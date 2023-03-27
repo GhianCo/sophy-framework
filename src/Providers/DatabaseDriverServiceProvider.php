@@ -13,10 +13,10 @@ class DatabaseDriverServiceProvider implements IServiceProvider
     {
         switch (config('database.driver', 'mysql')) {
             case 'mysql' || 'pgsql':
-                App::$container->set(IDBDriver::class, \DI\get(PdoDriver::class));
+                singleton(IDBDriver::class, PdoDriver::class);
                 break;
             default:
-                App::$container->set(IDBDriver::class, \DI\get(PdoDriver::class));
+                singleton(IDBDriver::class, PdoDriver::class);
                 break;
         }
     }
