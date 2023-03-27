@@ -2,7 +2,6 @@
 
 namespace Sophy\Application\Actions;
 
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
@@ -10,18 +9,12 @@ use Slim\Exception\HttpNotFoundException;
 
 abstract class Action
 {
-    protected ContainerInterface $container;
 
     protected Request $request;
 
     protected Response $response;
 
     protected array $args;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
 
     /**
      * @throws HttpNotFoundException
