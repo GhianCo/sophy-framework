@@ -5,4 +5,5 @@ return [
     'env' => env('APP_ENV', 'dev'),
     'url' => env('APP_URL', 'localhost'),
     'domain' => env('APP_DOMAIN', 'localhost'),
+    'pathRoute' => env('PATH_ROUTE', '/'),
 ];

@@ -73,7 +73,7 @@ class App
         $this->router = singleton(Router::class, function () {
             AppFactory::setContainer(self::$container);
             $router = AppFactory::create();
-            $router->setBasePath('/sophy-framework');
+            $router->setBasePath(config("app.pathRoute"));
             return $router;
         });
         $this->server = app(IServer::class);
