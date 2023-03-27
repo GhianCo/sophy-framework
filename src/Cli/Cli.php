@@ -2,6 +2,7 @@
 
 namespace Sophy\Cli;
 
+use DI\ContainerBuilder;
 use Sophy\App;
 use Dotenv\Dotenv;
 use Sophy\Cli\Commands\MakeModule;
@@ -14,6 +15,12 @@ class Cli
     public static function bootstrap(string $root): self
     {
         App::$root = $root;
+
+        $containerBuilder = new ContainerBuilder();
+        $containerBuilder->useAutowiring(true);
+
+        App::$container = $containerBuilder->build();
+
         Dotenv::createImmutable($root)->load();
         Config::load($root . "/config");
 
