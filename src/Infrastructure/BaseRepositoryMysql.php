@@ -3,7 +3,6 @@
 namespace Sophy\Infrastructure;
 
 use Sophy\Constants;
-use Sophy\Database\Drivers\DBHandler;
 use Sophy\Database\Drivers\IDBDriver;
 use Sophy\Database\Drivers\Mysql\QueryBuilderMysql;
 use Sophy\Domain\BaseEntity;
@@ -227,7 +226,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
         try {
             $statement = $this->driver->statement(
                 'DELETE FROM ' . $this->getTable() . ' WHERE ' . $this->getKeyName() . '=:' . $this->getKeyName() . ' LIMIT 1',
-                [':' . $this->getKeyName() => $entity->{$this->getKeyName()}, PDO::PARAM_STR]
+                [':' . $this->getKeyName() => $entity->{$this->getKeyName()}]
             );
             return $statement->rowCount();
         } catch (\Exception $exception) {

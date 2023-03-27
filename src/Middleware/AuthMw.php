@@ -9,7 +9,7 @@ use Psr\Http\Server\MiddlewareInterface as Middleware;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Sophy\Domain\Exceptions\AuthException;
 
-class SessionMiddleware implements Middleware
+class AuthMw implements Middleware
 {
     /**
      * {@inheritdoc}
