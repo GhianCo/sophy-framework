@@ -5,5 +5,5 @@ use Sophy\Routing\Route;
 
 Route::get('/', DefaultAction::class);
 
-Route::group('/api', function ($app) {
+Route::group('/api', function ($group) {
 });
