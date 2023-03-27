@@ -3,7 +3,6 @@
 namespace Sophy;
 
 use DI\Container;
-use PDO;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Sophy\Config\Config;
 use DI\ContainerBuilder;
@@ -12,7 +11,7 @@ use Slim\Psr7\Request;
 use Sophy\Application\Handlers\HttpErrorHandler;
 use Sophy\Application\Handlers\ShutdownHandler;
 use Sophy\Application\ResponseEmitter\ResponseEmitter;
-use Sophy\Database\Drivers\DBHandler;
+use Sophy\Database\Drivers\IDBDriver;
 use Sophy\Server\IServer;
 use Slim\Factory\AppFactory;
 use Slim\App as Router;
@@ -30,6 +29,7 @@ class App
 
     public static Container $container;
 
+    public IDBDriver $database;
 
     public static function bootstrap(string $root): self
     {
@@ -87,24 +87,17 @@ class App
 
     protected function setUpDatabaseConnection(): self
     {
-        singleton(DBHandler::class, function () {
+        $this->database = app(IDBDriver::class);
 
-            $driver = config('database.driver');
-            $host = config('database.host');
-            $dbname = config('database.name');
-            $username = config('database.username');
-            $password = config('database.password');
-            $charset = config('database.charset');
+        $this->database->connect(
+            config("database.driver"),
+            config("database.host"),
+            config("database.port"),
+            config("database.name"),
+            config("database.username"),
+            config("database.password"),
+            );
 
-            $dsn = $driver . ":host=$host;dbname=$dbname;charset=$charset";
-
-            $dbHandler = new DBHandler($dsn, $username, $password);
-            $dbHandler->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $dbHandler->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            $dbHandler->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-            return $dbHandler;
-        });
         return $this;
     }
 

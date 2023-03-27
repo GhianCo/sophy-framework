@@ -4,6 +4,7 @@ namespace Sophy\Infrastructure;
 
 use Sophy\Constants;
 use Sophy\Database\Drivers\DBHandler;
+use Sophy\Database\Drivers\IDBDriver;
 use Sophy\Database\Drivers\Mysql\QueryBuilderMysql;
 use Sophy\Domain\BaseEntity;
 use Sophy\Domain\BaseRepository;
@@ -15,7 +16,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
 
     use QueryBuilderMysql;
 
-    public DBHandler $dbHandler;
+    public IDBDriver $driver;
 
     private $table = null;
     private $columns = array();
@@ -26,9 +27,9 @@ abstract class BaseRepositoryMysql implements BaseRepository
     private $perPage = 0;
     private $nameSpaceEntity = 'App\\%s\\Domain\\Entities\\%s';
 
-    public function __construct(DBHandler $dbHandler)
+    public function __construct(IDBDriver $driver)
     {
-        $this->dbHandler = $dbHandler;
+        $this->driver = $driver;
     }
 
     /**
@@ -176,7 +177,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
                 $insertQuery->columns($key);
             }
 
-            $statement = $this->dbHandler->prepare($insertQuery);
+            $statement = $this->driver->prepare($insertQuery);
 
             foreach ($entity as $key => &$value) {
                 if (!isset($value)) {
@@ -188,7 +189,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
             $statement->execute();
 
             if ($statement->rowCount() === 1) {
-                return $this->dbHandler->lastInsertId();
+                return $this->driver->lastInsertId();
             } else {
                 return Constants::NOT;
             }
@@ -210,7 +211,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
             }
 
             $updateQuery->where($this->getKeyName() . ' = :' . $this->getKeyName());
-            $statement = $this->dbHandler->prepare($updateQuery);
+            $statement = $this->driver->prepare($updateQuery);
 
             foreach ($entity as $key => &$value) {
                 $statement->bindParam(':' . $key, $value);
@@ -225,7 +226,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     public function delete(BaseEntity $entity)
     {
         try {
-            $statement = $this->dbHandler->prepare('DELETE FROM ' . $this->getTable() . ' WHERE ' . $this->getKeyName() . '=:' . $this->getKeyName() . ' LIMIT 1');
+            $statement = $this->driver->prepare('DELETE FROM ' . $this->getTable() . ' WHERE ' . $this->getKeyName() . '=:' . $this->getKeyName() . ' LIMIT 1');
             $statement->bindParam(':' . $this->getKeyName(), $entity->{$this->getKeyName()}, PDO::PARAM_STR);
             $statement->execute();
             return $statement->rowCount();
@@ -282,20 +283,21 @@ abstract class BaseRepositoryMysql implements BaseRepository
                 $selectQuery->perPage($this->getPerPage());
             }
 
-            $statement = $this->dbHandler->prepare($selectQuery);
-
+            $binds = [];
             foreach ($this->getWhereParams() as $wp) {
                 if (!isset($wp['value']) || is_array($wp['value'])) {
                     continue;
                 }
                 $fieldClean = str_replace('.', '', $wp['field']);
-                $statement->bindParam(':' . (is_array($wp["field"]) ? implode('', $wp["field"]) : $fieldClean), $wp["value"]);
+                $binds[':' . (is_array($wp["field"]) ? implode('', $wp["field"]) : $fieldClean)] = $wp["value"];
             }
-            $statement->execute();
+
+            $statement = $this->driver->statement($selectQuery, $binds);
+
             $table = ucfirst($this->getTable());
             $statement->setFetchMode(PDO::FETCH_CLASS, sprintf($this->nameSpaceEntity, $table, $table));
 
-            $result = $this->dbHandler->query("SELECT FOUND_ROWS() AS foundRows");
+            $result = $this->driver->query("SELECT FOUND_ROWS() AS foundRows");
             $result->setFetchMode(PDO::FETCH_ASSOC);
             $total = $result->fetch()["foundRows"];
 
@@ -334,15 +336,15 @@ abstract class BaseRepositoryMysql implements BaseRepository
                 $selectQuery->innerJoin($join['table'] . ' ON ' . $join['table'] . '.' . $join['tablePK'] . ' = ' . $this->getTable() . '.' . $join['tablePK']);
             }
 
-            $statement = $this->dbHandler->prepare($selectQuery);
-
+            $binds = [];
             foreach ($this->getWhereParams() as $wp) {
                 $fieldClean = str_replace('.', '', $wp['field']);
-                $statement->bindParam(':' . (is_array($wp["field"]) ? implode('', $wp["field"]) : $fieldClean), $wp["value"]);
+                $binds[':' . (is_array($wp["field"]) ? implode('', $wp["field"]) : $fieldClean)] = $wp["value"];
             }
 
-            $statement->execute();
+            $statement = $this->driver->statement($selectQuery, $binds);
             $table = ucfirst($this->getTable());
+
             return $statement->fetchObject(sprintf($this->nameSpaceEntity, $table, $table));
 
         } catch (\Exception $exception) {
