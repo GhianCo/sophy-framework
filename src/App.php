@@ -62,8 +62,7 @@ class App
     protected function runServiceProviders(string $type): self
     {
         foreach (config("providers.$type", []) as $provider) {
-            $provider = new $provider();
-            $provider->registerServices();
+            (new $provider())->registerServices();
         }
 
         return $this;
@@ -134,5 +133,7 @@ class App
         $response = $this->router->handle($request);
         $responseEmitter = new ResponseEmitter();
         $responseEmitter->emit($response);
+
+        $this->database->close();
     }
 }

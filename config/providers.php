@@ -10,5 +10,6 @@ return [
         App\Providers\RepositoryServiceProvider::class,
     ],
     'cli' => [
+        Sophy\Providers\DatabaseDriverServiceProvider::class,
     ]
 ];

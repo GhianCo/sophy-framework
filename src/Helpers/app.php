@@ -6,7 +6,7 @@ use Sophy\Container\Container;
 
 function app(string $class = App::class)
 {
-    return App::$container->get($class) ?? null;
+    return Container::resolve($class);
 }
 
 function singleton(string $class, $build = null)

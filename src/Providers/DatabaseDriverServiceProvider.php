@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Sophy\Providers;
-
 
 use Sophy\App;
 use Sophy\Database\Drivers\IDBDriver;

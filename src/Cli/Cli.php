@@ -6,6 +6,7 @@ use Sophy\App;
 use Dotenv\Dotenv;
 use Sophy\Cli\Commands\MakeModule;
 use Sophy\Config\Config;
+use Sophy\Database\Drivers\IDBDriver;
 use Symfony\Component\Console\Application;
 
 class Cli
@@ -20,16 +21,15 @@ class Cli
             (new $provider())->registerServices();
         }
 
-        /*
-        app(DatabaseDriver::class)->connect(
-            config("database.connection"),
+        app(IDBDriver::class)->connect(
+            config("database.driver"),
             config("database.host"),
             config("database.port"),
-            config("database.database"),
+            config("database.name"),
             config("database.username"),
             config("database.password"),
             );
-
+        /*
         singleton(
             Migrator::class,
             fn() => new Migrator(
