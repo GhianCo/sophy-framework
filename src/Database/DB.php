@@ -10,4 +10,9 @@ class DB
     {
         return app(IDBDriver::class)->statement($query, $bind);
     }
+
+    public static function query(string $query)
+    {
+        return app(IDBDriver::class)->query($query);
+    }
 }

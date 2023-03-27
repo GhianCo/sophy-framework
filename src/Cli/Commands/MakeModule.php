@@ -4,9 +4,11 @@ namespace Sophy\Cli\Commands;
 
 use Sophy\App;
 use Sophy\Cli\Utils;
+use Sophy\Database\DB;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class MakeModule extends Command
@@ -16,6 +18,8 @@ class MakeModule extends Command
 
     protected $templatesDir = '';
     protected $appDir = '';
+    protected $infoTable = [];
+    protected $output = null;
 
     protected static $defaultName = "make:module";
     protected static $defaultDescription = "Create a new module";
@@ -27,13 +31,17 @@ class MakeModule extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->output = new ConsoleOutput();
         $name = $input->getArgument("name");
 
         $this->templatesDir = App::$root . '/src/resources/templates/';
         $this->appDir = App::$root . '/app/';
 
+        $this->validateHasTable($name);
+
         $this->makeActions($name);
         $this->makeEntity($name);
+        $this->makeDTO($name);
         $this->makeException($name);
         $this->makeRepository($name);
         $this->makeRoute($name);
@@ -41,6 +49,24 @@ class MakeModule extends Command
 
         $output->writeln("<info>Module created => $name</info>");
         return Command::SUCCESS;
+    }
+
+    private function validateHasTable($name)
+    {
+        try {
+            $query = DB::query('describe ' . $name);
+            $dataTable = $query->fetchAll();
+
+            foreach ($dataTable as $index => $value) {
+                $data = new \stdClass();
+                $data->key = $value['Field'];
+                $data->data = $value;
+                $this->infoTable[$index] = $data;
+            }
+        } catch (\Exception $exception) {
+            $this->output->writeln('<error>' . $exception->getMessage() . '</error>');
+        }
+
     }
 
     private function makeActions($name)
@@ -62,7 +88,68 @@ class MakeModule extends Command
 
     private function makeEntity($name)
     {
+        $__srcEntity = PHP_EOL;
+        $__srcEntity .= PHP_EOL;
+        $__srcEntity .= "namespace App\\" . ucfirst($name) . "\Domain\Entities;" . PHP_EOL;
+        $__srcEntity .= PHP_EOL;
+        $__srcEntity .= "use Sophy\Domain\BaseEntity;" . PHP_EOL;
+        $__srcEntity .= PHP_EOL;
+        $__srcEntity .= "final class " . ucfirst($name) . " extends BaseEntity" . PHP_EOL;
+        $__srcEntity .= "{" . PHP_EOL;
+        $__srcEntity .= PHP_EOL;
+        $__srcEntity .= "    protected \$fillable = [" . PHP_EOL;
+        foreach ($this->infoTable as $indexField => $field) {
+            $__srcEntity .= "        '" . $this->infoTable[$indexField]->key . "'," . PHP_EOL;
+        }
+        $__srcEntity .= "    ];" . PHP_EOL;
 
+        $__srcEntity .= PHP_EOL;
+
+        foreach ($this->infoTable as $indexField => $field) {
+            $field = $this->infoTable[$indexField]->key;
+            $__srcEntity .= "    public function set" . ucwords($field) . "($" . $field . "){ " . PHP_EOL;
+            $__srcEntity .= "        \$this->setAttribute('" . $field . "', \$" . $field . ");" . PHP_EOL;
+            $__srcEntity .= "    }" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+
+            $__srcEntity .= "    public function get" . ucwords($field) . "(){ " . PHP_EOL;
+            $__srcEntity .= "        return \$this->getAttribute('" . $field . "');" . PHP_EOL;
+            $__srcEntity .= "    }" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+
+        }
+        $__srcEntity .= "}" . PHP_EOL;
+
+        $__srcEntity = "<?php " . $__srcEntity . "?>";
+
+        $dir = $this->appDir . ucfirst($name) . '/Domain/Entities';
+
+        @mkdir($dir, 0777, true);
+
+        $this->_writeFile($__srcEntity, $dir . '/' . ucfirst($name) . ".php");
+    }
+
+    private function makeDTO($name)
+    {
+        $__srcEntity = PHP_EOL;
+        $__srcEntity .= PHP_EOL;
+        $__srcEntity .= "namespace App\\" . ucfirst($name) . "\Application\DTO;" . PHP_EOL;
+        $__srcEntity .= PHP_EOL;
+        $__srcEntity .= "final class " . ucfirst($name) . "DTO" . PHP_EOL;
+        $__srcEntity .= "{" . PHP_EOL;
+        foreach ($this->infoTable as $indexField => $field) {
+            $__srcEntity .= "    public $" . $this->infoTable[$indexField]->key . ";" . PHP_EOL;
+        }
+
+        $__srcEntity .= "}" . PHP_EOL;
+
+        $__srcEntity = "<?php " . $__srcEntity . "?>";
+
+        $dir = $this->appDir . ucfirst($name) . '/Application/DTO';
+
+        @mkdir($dir, 0777, true);
+
+        $this->_writeFile($__srcEntity, $dir . '/' . ucfirst($name) . "DTO.php");
     }
 
     private function makeException($name)
