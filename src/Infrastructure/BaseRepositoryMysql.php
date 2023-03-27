@@ -177,16 +177,15 @@ abstract class BaseRepositoryMysql implements BaseRepository
                 $insertQuery->columns($key);
             }
 
-            $statement = $this->driver->prepare($insertQuery);
-
+            $binds = [];
             foreach ($entity as $key => &$value) {
                 if (!isset($value)) {
                     continue;
                 }
-                $statement->bindParam(':' . $key, $value);
+                $binds[':' . $key] = $value;
             }
 
-            $statement->execute();
+            $statement = $this->driver->statement($insertQuery, $binds);
 
             if ($statement->rowCount() === 1) {
                 return $this->driver->lastInsertId();
@@ -211,13 +210,13 @@ abstract class BaseRepositoryMysql implements BaseRepository
             }
 
             $updateQuery->where($this->getKeyName() . ' = :' . $this->getKeyName());
-            $statement = $this->driver->prepare($updateQuery);
 
+            $binds = [];
             foreach ($entity as $key => &$value) {
-                $statement->bindParam(':' . $key, $value);
+                $binds[':' . $key] = $value;
             }
 
-            $statement->execute();
+            $this->driver->statement($updateQuery, $binds);
         } catch (\Exception $exception) {
             throw new ConexionDBException($exception->getMessage(), 500);
         }
@@ -226,9 +225,10 @@ abstract class BaseRepositoryMysql implements BaseRepository
     public function delete(BaseEntity $entity)
     {
         try {
-            $statement = $this->driver->prepare('DELETE FROM ' . $this->getTable() . ' WHERE ' . $this->getKeyName() . '=:' . $this->getKeyName() . ' LIMIT 1');
-            $statement->bindParam(':' . $this->getKeyName(), $entity->{$this->getKeyName()}, PDO::PARAM_STR);
-            $statement->execute();
+            $statement = $this->driver->statement(
+                'DELETE FROM ' . $this->getTable() . ' WHERE ' . $this->getKeyName() . '=:' . $this->getKeyName() . ' LIMIT 1',
+                [':' . $this->getKeyName() => $entity->{$this->getKeyName()}, PDO::PARAM_STR]
+            );
             return $statement->rowCount();
         } catch (\Exception $exception) {
             throw new ConexionDBException($exception->getMessage(), 500);
