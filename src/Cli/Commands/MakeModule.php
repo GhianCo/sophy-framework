@@ -34,21 +34,27 @@ class MakeModule extends Command
         $this->output = new ConsoleOutput();
         $name = $input->getArgument("name");
 
-        $this->templatesDir = App::$root . '/src/resources/templates/';
+        $this->templatesDir = resourcesDirectory(). '/templates/';
         $this->appDir = App::$root . '/app/';
 
-        $this->validateHasTable($name);
+        $moduleIsValid = $this->validateHasTable($name);
 
-        $this->makeActions($name);
-        $this->makeEntity($name);
-        $this->makeDTO($name);
-        $this->makeException($name);
-        $this->makeRepository($name);
-        $this->makeRoute($name);
-        $this->makeServices($name);
+        if ($moduleIsValid) {
+            $this->makeActions($name);
+            $this->makeEntity($name);
+            $this->makeDTO($name);
+            $this->makeException($name);
+            $this->makeRepository($name);
+            $this->makeRoute($name);
+            $this->makeServices($name);
 
-        $output->writeln("<info>Module created => $name</info>");
-        return Command::SUCCESS;
+            $output->writeln("<info>Module created => $name</info>");
+
+            return Command::SUCCESS;
+
+        }
+
+        return Command::FAILURE;
     }
 
     private function validateHasTable($name)
@@ -63,8 +69,11 @@ class MakeModule extends Command
                 $data->data = $value;
                 $this->infoTable[$index] = $data;
             }
+            return true;
+
         } catch (\Exception $exception) {
             $this->output->writeln('<error>' . $exception->getMessage() . '</error>');
+            return false;
         }
 
     }
