@@ -11,7 +11,7 @@ function recursiveCopy($source, $target)
             }
             $entryDir = $source . '/' . $entry;
             if (is_dir($entryDir)) {
-                rcopy($entryDir, $target . '/' . $entry);
+                recursiveCopy($entryDir, $target . '/' . $entry);
                 continue;
             }
             copy($entryDir, $target . '/' . $entry);
