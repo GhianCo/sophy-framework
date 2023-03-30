@@ -3,7 +3,6 @@
 namespace Sophy\Cli\Commands;
 
 use Sophy\App;
-use Sophy\Cli\Utils;
 use Sophy\Database\DB;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -13,8 +12,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class MakeModule extends Command
 {
-
-    use Utils;
 
     protected $templatesDir = '';
     protected $appDir = '';
@@ -83,16 +80,16 @@ class MakeModule extends Command
         $source = $this->templatesDir . 'ObjectBaseActions';
         $target = $this->appDir . ucfirst($name) . '/Application/Actions';
 
-        $this->rcopy($source, $target);
+        recursiveCopy($source, $target);
 
-        $this->replaceFileContent($target . '/Base.php', $name);
-        $this->replaceFileContent($target . '/Create.php', $name);
-        $this->replaceFileContent($target . '/CreateValidator.php', $name);
-        $this->replaceFileContent($target . '/GetAll.php', $name);
-        $this->replaceFileContent($target . '/GetByBody.php', $name);
-        $this->replaceFileContent($target . '/GetByQuery.php', $name);
-        $this->replaceFileContent($target . '/GetOne.php', $name);
-        $this->replaceFileContent($target . '/Update.php', $name);
+        replaceFileContent($target . '/Base.php', $name);
+        replaceFileContent($target . '/Create.php', $name);
+        replaceFileContent($target . '/CreateValidator.php', $name);
+        replaceFileContent($target . '/GetAll.php', $name);
+        replaceFileContent($target . '/GetByBody.php', $name);
+        replaceFileContent($target . '/GetByQuery.php', $name);
+        replaceFileContent($target . '/GetOne.php', $name);
+        replaceFileContent($target . '/Update.php', $name);
     }
 
     private function makeEntity($name)
@@ -135,7 +132,7 @@ class MakeModule extends Command
 
         @mkdir($dir, 0777, true);
 
-        $this->_writeFile($__srcEntity, $dir . '/' . ucfirst($name) . ".php");
+        writeFile($__srcEntity, $dir . '/' . ucfirst($name) . ".php");
     }
 
     private function makeDTO($name)
@@ -158,7 +155,7 @@ class MakeModule extends Command
 
         @mkdir($dir, 0777, true);
 
-        $this->_writeFile($__srcEntity, $dir . '/' . ucfirst($name) . "DTO.php");
+        writeFile($__srcEntity, $dir . '/' . ucfirst($name) . "DTO.php");
     }
 
     private function makeException($name)
@@ -170,7 +167,7 @@ class MakeModule extends Command
         @mkdir($this->appDir . ucfirst($name) . '/Domain/Exceptions');
         copy($source, $target);
 
-        $this->replaceFileContent($target, $name);
+        replaceFileContent($target, $name);
     }
 
     private function makeRepository($name)
@@ -184,8 +181,8 @@ class MakeModule extends Command
         copy($iSource, $iTarget);
         copy($source, $target);
 
-        $this->replaceFileContent($iTarget, $name);
-        $this->replaceFileContent($target, $name);
+        replaceFileContent($iTarget, $name);
+        replaceFileContent($target, $name);
     }
 
     private function makeRoute($name)
@@ -194,7 +191,7 @@ class MakeModule extends Command
         $target = $this->appDir . ucfirst($name) . '/' . ucfirst($name) . 'Routes.php';
         copy($source, $target);
 
-        $this->replaceFileContent($target, $name);
+        replaceFileContent($target, $name);
     }
 
     private function makeServices($name)
@@ -202,11 +199,11 @@ class MakeModule extends Command
         $source = $this->templatesDir . 'ObjectbaseServices';
         $target = $this->appDir . ucfirst($name) . '/Application/Services';
 
-        $this->rcopy($source, $target);
+        recursiveCopy($source, $target);
 
-        $this->replaceFileContent($target . '/Base.php', $name);
-        $this->replaceFileContent($target . '/CreateService.php', $name);
-        $this->replaceFileContent($target . '/FindService.php', $name);
-        $this->replaceFileContent($target . '/UpdateService.php', $name);
+        replaceFileContent($target . '/Base.php', $name);
+        replaceFileContent($target . '/CreateService.php', $name);
+        replaceFileContent($target . '/FindService.php', $name);
+        replaceFileContent($target . '/UpdateService.php', $name);
     }
 }
