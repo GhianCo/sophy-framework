@@ -10,24 +10,21 @@ use Sophy\Domain\BaseRepository;
 use Sophy\Domain\Exceptions\ConexionDBException;
 use PDO;
 
-abstract class BaseRepositoryMysql implements BaseRepository
-{
-
+abstract class BaseRepositoryMysql implements BaseRepository {
     use QueryBuilderMysql;
 
     public IDBDriver $driver;
 
     private $table = null;
-    private $columns = array();
-    private $whereParams = array();
-    private $orderParams = array();
-    private $joins = array();
+    private $columns = [];
+    private $whereParams = [];
+    private $orderParams = [];
+    private $joins = [];
     private $page = 0;
     private $perPage = 0;
     private $nameSpaceEntity = 'App\\%s\\Domain\\Entities\\%s';
 
-    public function __construct(IDBDriver $driver)
-    {
+    public function __construct(IDBDriver $driver) {
         $this->driver = $driver;
     }
 
@@ -35,32 +32,28 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param string $table
      * @return void
      */
-    public function setTable(string $table)
-    {
+    public function setTable(string $table) {
         $this->table = $table;
     }
 
     /**
      * @return string
      */
-    public function getTable()
-    {
+    public function getTable() {
         return $this->table;
     }
 
     /**
      * @return string
      */
-    public function getKeyName(): string
-    {
+    public function getKeyName(): string {
         return $this->table . '_id';
     }
 
     /**
      * @return array
      */
-    public function getColumns(): array
-    {
+    public function getColumns(): array {
         return $this->columns;
     }
 
@@ -68,8 +61,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param array $columns
      * @return $this
      */
-    public function setColumns(array $columns)
-    {
+    public function setColumns(array $columns) {
         $this->columns = $columns;
         return $this;
     }
@@ -77,8 +69,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     /**
      * @return array
      */
-    public function getWhereParams(): array
-    {
+    public function getWhereParams(): array {
         return $this->whereParams;
     }
 
@@ -86,8 +77,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param array $whereParams
      * @return $this
      */
-    public function setWhereParams(array $whereParams)
-    {
+    public function setWhereParams(array $whereParams) {
         $this->whereParams = $whereParams;
         return $this;
     }
@@ -95,8 +85,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     /**
      * @return array
      */
-    public function getOrderParams(): array
-    {
+    public function getOrderParams(): array {
         return $this->orderParams;
     }
 
@@ -104,8 +93,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param array $orderParams
      * @return $this
      */
-    public function setOrderParams(array $orderParams)
-    {
+    public function setOrderParams(array $orderParams) {
         $this->orderParams = $orderParams;
         return $this;
     }
@@ -113,8 +101,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     /**
      * @return array
      */
-    public function getJoins(): array
-    {
+    public function getJoins(): array {
         return $this->joins;
     }
 
@@ -122,8 +109,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param array $joins
      * @return $this
      */
-    public function setJoins(array $joins)
-    {
+    public function setJoins(array $joins) {
         $this->joins = $joins;
         return $this;
     }
@@ -131,8 +117,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     /**
      * @return int
      */
-    public function getPage(): int
-    {
+    public function getPage(): int {
         return $this->page;
     }
 
@@ -140,8 +125,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param int $page
      * @return $this
      */
-    public function setPage(int $page)
-    {
+    public function setPage(int $page) {
         $this->page = $page;
         return $this;
     }
@@ -149,8 +133,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     /**
      * @return int
      */
-    public function getPerPage(): int
-    {
+    public function getPerPage(): int {
         return $this->perPage;
     }
 
@@ -158,14 +141,12 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param int $perPage
      * @return $this
      */
-    public function setPerPage(int $perPage)
-    {
+    public function setPerPage(int $perPage) {
         $this->perPage = $perPage;
         return $this;
     }
 
-    public function insert(BaseEntity $entity): int
-    {
+    public function insert(BaseEntity $entity): int {
         try {
             $insertQuery = $this->insertQuery($this->getTable());
 
@@ -196,8 +177,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
     }
 
-    public function update(BaseEntity $entity): void
-    {
+    public function update(BaseEntity $entity): void {
         try {
             $updateQuery = $this->updateQuery($this->getTable());
 
@@ -221,8 +201,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
     }
 
-    public function delete(BaseEntity $entity)
-    {
+    public function delete(BaseEntity $entity) {
         try {
             $statement = $this->driver->statement(
                 'DELETE FROM ' . $this->getTable() . ' WHERE ' . $this->getKeyName() . '=:' . $this->getKeyName() . ' LIMIT 1',
@@ -234,9 +213,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
     }
 
-    public function fetchRowsByCriteria($criteria = [])
-    {
-
+    public function fetchRowsByCriteria($criteria = []) {
         $this->setColumns(isset($criteria['columns']) ? $criteria['columns'] : [])
             ->setWhereParams(isset($criteria['whereParams']) ? $criteria['whereParams'] : [])
             ->setOrderParams(isset($criteria['orderParams']) ? $criteria['orderParams'] : [])
@@ -247,19 +224,15 @@ abstract class BaseRepositoryMysql implements BaseRepository
         return $this->execQueryRows();
     }
 
-    public function fetchRowByCriteria($criteria = [])
-    {
+    public function fetchRowByCriteria($criteria = []) {
         $this->setColumns(isset($criteria['columns']) ? $criteria['columns'] : [])
             ->setJoins(isset($criteria['joins']) ? $criteria['joins'] : [])
             ->setWhereParams(isset($criteria['whereParams']) ? $criteria['whereParams'] : []);
         return $this->execQueryRow();
     }
 
-    protected function execQueryRows()
-    {
-
+    protected function execQueryRows() {
         try {
-
             $selectQuery = $this->selectQuery($this->getTable(), is_array($this->getColumns()) && count($this->getColumns()) ? implode(', ', $this->getColumns()) : '*')
                 ->callFoundRows(true)
                 ->where($this->buildWhere());
@@ -322,11 +295,8 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
     }
 
-    protected function execQueryRow()
-    {
-
+    protected function execQueryRow() {
         try {
-
             $selectQuery = $this->selectQuery($this->getTable(), is_array($this->getColumns()) && count($this->getColumns()) ? implode(', ', $this->getColumns()) : '*')
                 ->where($this->buildWhere())
                 ->page(1);
@@ -345,10 +315,8 @@ abstract class BaseRepositoryMysql implements BaseRepository
             $table = ucfirst($this->getTable());
 
             return $statement->fetchObject(sprintf($this->nameSpaceEntity, $table, $table));
-
         } catch (\Exception $exception) {
             throw new ConexionDBException($exception->getMessage(), 500);
         }
     }
-
 }

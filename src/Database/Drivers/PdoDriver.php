@@ -4,8 +4,7 @@ namespace Sophy\Database\Drivers;
 
 use PDO;
 
-class PdoDriver implements IDBDriver
-{
+class PdoDriver implements IDBDriver {
     protected ?PDO $pdo;
 
     public function connect(
@@ -15,8 +14,7 @@ class PdoDriver implements IDBDriver
         string $database,
         string $username,
         string $password
-    )
-    {
+    ) {
         $dsn = "$protocol:host=$host;port=$port;dbname=$database";
         $this->pdo = new PDO($dsn, $username, $password);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -24,25 +22,21 @@ class PdoDriver implements IDBDriver
         $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     }
 
-    public function close()
-    {
+    public function close() {
         $this->pdo = null;
     }
 
-    public function lastInsertId()
-    {
+    public function lastInsertId() {
         return $this->pdo->lastInsertId();
     }
 
-    public function statement(string $query, array $bind = [])
-    {
+    public function statement(string $query, array $bind = []) {
         $statement = $this->pdo->prepare($query);
         $statement->execute($bind);
         return $statement;
     }
 
-    public function query(string $query)
-    {
+    public function query(string $query) {
         return $this->pdo->query($query);
     }
 }

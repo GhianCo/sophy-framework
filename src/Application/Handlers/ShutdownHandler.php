@@ -6,8 +6,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpInternalServerErrorException;
 use Sophy\Application\ResponseEmitter\ResponseEmitter;
 
-class ShutdownHandler
-{
+class ShutdownHandler {
     private Request $request;
 
     private HttpErrorHandler $errorHandler;
@@ -24,8 +23,7 @@ class ShutdownHandler
         $this->displayErrorDetails = $displayErrorDetails;
     }
 
-    public function __invoke()
-    {
+    public function __invoke() {
         $error = error_get_last();
         if ($error) {
             $errorFile = $error['file'];

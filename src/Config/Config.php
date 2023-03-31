@@ -2,12 +2,10 @@
 
 namespace Sophy\Config;
 
-class Config
-{
+class Config {
     private static array $config = [];
 
-    public static function load(string $path)
-    {
+    public static function load(string $path) {
         foreach (glob("$path/*.php") as $config) {
             $key = explode(".", basename($config))[0];
             $values = require_once $config;
@@ -15,8 +13,7 @@ class Config
         }
     }
 
-    public static function get(string $configuration, $default = null)
-    {
+    public static function get(string $configuration, $default = null) {
         $keys = explode(".", $configuration);
         $finalKey = array_pop($keys);
         $array = self::$config;

@@ -2,14 +2,12 @@
 
 namespace Sophy;
 
-class Constants
-{
-    const UNDEFINED = -1;
+class Constants {
+    public const UNDEFINED = -1;
 
-    const STATE_ACTIVE = 1;
-    const STATE_INACTIVE = 0;
+    public const STATE_ACTIVE = 1;
+    public const STATE_INACTIVE = 0;
 
-    const YES = 1;
-    const NOT = 0;
-
+    public const YES = 1;
+    public const NOT = 0;
 }

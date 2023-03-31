@@ -2,7 +2,6 @@
 
 namespace Sophy\Database\Drivers\Interfaces;
 
-interface IQueryBuilder
-{
+interface IQueryBuilder {
     public function __toString(): string;
 }

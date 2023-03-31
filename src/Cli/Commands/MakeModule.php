@@ -11,9 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MakeModule extends Command
-{
-
+class MakeModule extends Command {
     protected $templatesDir = '';
     protected $appDir = '';
     protected $infoTable = [];
@@ -22,13 +20,11 @@ class MakeModule extends Command
     protected static $defaultName = "make:module";
     protected static $defaultDescription = "Create a new module";
 
-    protected function configure()
-    {
+    protected function configure() {
         $this->addArgument("name", InputArgument::REQUIRED, "Module name");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
+    protected function execute(InputInterface $input, OutputInterface $output) {
         $this->output = new ConsoleOutput();
         $name = $input->getArgument("name");
 
@@ -46,18 +42,17 @@ class MakeModule extends Command
             $this->makeRoute($name);
             $this->makeServices($name);
             $this->addToRoute($name);
+            $this->addToRepositoryServiceProvider($name);
 
             $output->writeln("<info>Module created => $name</info>");
 
             return Command::SUCCESS;
-
         }
 
         return Command::FAILURE;
     }
 
-    private function validateHasTable($name)
-    {
+    private function validateHasTable($name) {
         try {
             $query = DB::query('describe ' . $name);
             $dataTable = $query->fetchAll();
@@ -69,16 +64,13 @@ class MakeModule extends Command
                 $this->infoTable[$index] = $data;
             }
             return true;
-
         } catch (\Exception $exception) {
             $this->output->writeln('<error>' . $exception->getMessage() . '</error>');
             return false;
         }
-
     }
 
-    private function makeActions($name)
-    {
+    private function makeActions($name) {
         $source = $this->templatesDir . 'ObjectBaseActions';
         $target = $this->appDir . ucfirst($name) . '/Application/Actions';
 
@@ -94,8 +86,7 @@ class MakeModule extends Command
         replaceFileContent($target . '/Update.php', $name);
     }
 
-    private function makeEntity($name)
-    {
+    private function makeEntity($name) {
         $__srcEntity = PHP_EOL;
         $__srcEntity .= PHP_EOL;
         $__srcEntity .= "namespace App\\" . ucfirst($name) . "\Domain\Entities;" . PHP_EOL;
@@ -124,7 +115,6 @@ class MakeModule extends Command
             $__srcEntity .= "        return \$this->getAttribute('" . $field . "');" . PHP_EOL;
             $__srcEntity .= "    }" . PHP_EOL;
             $__srcEntity .= PHP_EOL;
-
         }
         $__srcEntity .= "}" . PHP_EOL;
 
@@ -137,8 +127,7 @@ class MakeModule extends Command
         writeFile($__srcEntity, $dir . '/' . ucfirst($name) . ".php");
     }
 
-    private function makeDTO($name)
-    {
+    private function makeDTO($name) {
         $__srcEntity = PHP_EOL;
         $__srcEntity .= PHP_EOL;
         $__srcEntity .= "namespace App\\" . ucfirst($name) . "\Application\DTO;" . PHP_EOL;
@@ -160,8 +149,7 @@ class MakeModule extends Command
         writeFile($__srcEntity, $dir . '/' . ucfirst($name) . "DTO.php");
     }
 
-    private function makeException($name)
-    {
+    private function makeException($name) {
         $source = $this->templatesDir . 'ObjectbaseException.php';
         $target = $this->appDir . ucfirst($name) . '/Domain/Exceptions/' . ucfirst($name) . 'Exception.php';
 
@@ -172,8 +160,7 @@ class MakeModule extends Command
         replaceFileContent($target, $name);
     }
 
-    private function makeRepository($name)
-    {
+    private function makeRepository($name) {
         $iSource = $this->templatesDir . 'IObjectbaseRepository.php';
         $source = $this->templatesDir . 'ObjectbaseRepository.php';
 
@@ -187,8 +174,7 @@ class MakeModule extends Command
         replaceFileContent($target, $name);
     }
 
-    private function makeRoute($name)
-    {
+    private function makeRoute($name) {
         $source = $this->templatesDir . 'ObjectbaseRoute.php';
         $target = $this->appDir . ucfirst($name) . '/' . ucfirst($name) . 'Routes.php';
         copy($source, $target);
@@ -196,8 +182,7 @@ class MakeModule extends Command
         replaceFileContent($target, $name);
     }
 
-    private function makeServices($name)
-    {
+    private function makeServices($name) {
         $source = $this->templatesDir . 'ObjectbaseServices';
         $target = $this->appDir . ucfirst($name) . '/Application/Services';
 
@@ -210,8 +195,7 @@ class MakeModule extends Command
     }
 
     //Todo: Falta validar al no existir el archivo
-    private function addToRoute($name)
-    {
+    private function addToRoute($name) {
         $locationRouteFile = App::$root . '/routes/api.php';
         $routeModule = ucfirst($name) . 'Routes::group($group);';
         $useRouteModule = 'use App\\' . ucfirst($name) . '\\' . ucfirst($name) . 'Routes;';
@@ -249,7 +233,6 @@ class MakeModule extends Command
                         $lastOperatorFound = $lastOperatorFound[count($lastOperatorFound) - 1];
                         $routeApiLines = str_replace(trim($lastOperatorFound), trim($lastOperatorFound . PHP_EOL . $useRouteModule), $routeApiLines);
                     }
-
                 }
                 $routeApiLines .= $currentLine;
             }
@@ -257,7 +240,6 @@ class MakeModule extends Command
             @mkdir($dir, 0777, true);
 
             writeFile($routeApiLines, $dir . '/api.php');
-
         } else {
             $__srcEntity = PHP_EOL;
             $__srcEntity .= PHP_EOL;
@@ -280,4 +262,72 @@ class MakeModule extends Command
         }
     }
 
+    private function addToRepositoryServiceProvider($name) {
+        $locationRepositoryServiceProviderFile = App::$root . '/app/Providers/RepositoryServiceProvider.php';
+        $repositoryServiceProviderModule = 'App::$container->set(I' . ucfirst($name) . 'Repository::class, \DI\autowire(' . ucfirst($name) . 'RepositoryMysql::class)->method(\'setTable\', \'' . $name . '\'));';
+        $useRouteModule = 'use App\\' . ucfirst($name) . '\Domain\I' . ucfirst($name) . 'Repository;
+                           use App\\' . ucfirst($name) . '\Infrastructure\\' . ucfirst($name) . 'RepositoryMysql;';
+
+        if (file_exists($locationRepositoryServiceProviderFile) && stringInFileFound($locationRepositoryServiceProviderFile, $repositoryServiceProviderModule)) {
+            return false;
+        }
+
+        $fileRepositoryServiceProviderApi = @fopen($locationRepositoryServiceProviderFile, 'r');
+
+        $dir = App::$root . '/app/Providers';
+
+        if ($fileRepositoryServiceProviderApi) {
+            $startFunctionFound = false;
+            $endFunctionFound = false;
+
+            $repositoryServieProviderApiLines = '';
+
+            while (!feof($fileRepositoryServiceProviderApi)) {
+                $currentLine = fgets($fileRepositoryServiceProviderApi);
+                if (!$startFunctionFound) {
+                    $startFunctionFound = Regex::match('/function\s*([A-z0-9]+)?\s*\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*\{(?:[^}{]+|\{(?:[^}{]+|\{[^}{]*\})*\})/', $currentLine)->hasMatch();
+                }
+
+                if ($startFunctionFound && !$endFunctionFound) {
+                    $endFunctionFound = Regex::match('/\}/', $currentLine)->hasMatch();
+                }
+
+                if ($startFunctionFound && $endFunctionFound) {
+                    $repositoryServieProviderApiLines .= '    ' . $repositoryServiceProviderModule . PHP_EOL;
+
+                    preg_match_all('/^(.*\buse\b.*)$/m', $repositoryServieProviderApiLines, $allOperatorUse);
+
+                    if (count($allOperatorUse)) {
+                        $lastOperatorFound = $allOperatorUse[count($allOperatorUse) - 1];
+                        $lastOperatorFound = $lastOperatorFound[count($lastOperatorFound) - 1];
+                        $repositoryServieProviderApiLines = str_replace(trim($lastOperatorFound), trim($lastOperatorFound . PHP_EOL . $useRouteModule), $repositoryServieProviderApiLines);
+                    }
+                }
+                $repositoryServieProviderApiLines .= $currentLine;
+            }
+
+            @mkdir($dir, 0777, true);
+
+            writeFile($repositoryServieProviderApiLines, $dir . '/RepositoryServiceProvider.php');
+        } else {
+            $__srcEntity = PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "use App\DefaultAction;" . PHP_EOL;
+            $__srcEntity .= "use Sophy\Routing\Route;" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "Route::get('/', DefaultAction::class);" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "Route::group('/api', function (\$group) {" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "});" . PHP_EOL;
+
+            $__srcEntity = "<?php " . $__srcEntity;
+
+            @mkdir($dir, 0777, true);
+
+            writeFile($__srcEntity, $dir . '/RepositoryServiceProvider.php');
+
+            $this->addToRoute($name);
+        }
+    }
 }

@@ -2,6 +2,5 @@
 
 namespace Sophy\Domain\Exceptions;
 
-class AuthException extends SophyException
-{
+class AuthException extends SophyException {
 }

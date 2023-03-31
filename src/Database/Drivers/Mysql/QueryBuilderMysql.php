@@ -6,26 +6,21 @@ use Sophy\Database\Drivers\Interfaces\IInsertQueryBuilder;
 use Sophy\Database\Drivers\Interfaces\IUpdateQueryBuilder;
 use Sophy\Database\Drivers\Interfaces\ISelectQueryBuilder;
 
-trait QueryBuilderMysql
-{
-    protected static function selectQuery(string $table, string ...$fields): ISelectQueryBuilder
-    {
+trait QueryBuilderMysql {
+    protected static function selectQuery(string $table, string ...$fields): ISelectQueryBuilder {
         return new SelectQueryBuilder($table, $fields);
     }
 
-    protected static function insertQuery(string $table): IInsertQueryBuilder
-    {
+    protected static function insertQuery(string $table): IInsertQueryBuilder {
         return new InsertQueryBuilder($table);
     }
 
-    protected static function updateQuery($table): IUpdateQueryBuilder
-    {
+    protected static function updateQuery($table): IUpdateQueryBuilder {
         return new UpdateQueryBuilder($table);
     }
 
-    protected function buildWhere()
-    {
-        $conditions = array();
+    protected function buildWhere() {
+        $conditions = [];
 
         foreach ($this->whereParams as $index => $wp) {
             $statementWhere = '';
@@ -43,7 +38,7 @@ trait QueryBuilderMysql
                     } else {
                         if (strtolower(trim($wp['conditional'], ' ')) == 'and') {
                             $conditional = 'and';
-                        } else if (strtolower(trim($wp['conditional'], ' ')) == 'or') {
+                        } elseif (strtolower(trim($wp['conditional'], ' ')) == 'or') {
                             $conditional = 'or';
                         } else {
                             $conditional = 'and';
@@ -64,7 +59,7 @@ trait QueryBuilderMysql
                         $statementWhere .= sprintf(' %s %s :%s %s', $wp['field'], $operator, $fieldClean, $index != count($this->whereParams) - 1 ? $conditional : '');
                     }
                 }
-            } else if ($operatorConditional == 'whereIn') {
+            } elseif ($operatorConditional == 'whereIn') {
                 $statementWhere .= sprintf(' %s in %s %s', $wp['field'], is_array($wp['value']) ? '(' . implode(',', $wp['value']) . ')' : $wp['value'], $index != count($this->whereParams) - 1 ? $conditional : '');
             }
             $conditions[] = $statementWhere;
@@ -72,5 +67,4 @@ trait QueryBuilderMysql
 
         return $conditions;
     }
-
 }

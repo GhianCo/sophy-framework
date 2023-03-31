@@ -10,10 +10,8 @@ use Sophy\Config\Config;
 use Sophy\Database\Drivers\IDBDriver;
 use Symfony\Component\Console\Application;
 
-class Cli
-{
-    public static function bootstrap(string $root): self
-    {
+class Cli {
+    public static function bootstrap(string $root): self {
         App::$root = $root;
 
         $containerBuilder = new ContainerBuilder();
@@ -35,7 +33,7 @@ class Cli
             config("database.name"),
             config("database.username"),
             config("database.password"),
-            );
+        );
         /*
         singleton(
             Migrator::class,
@@ -49,8 +47,7 @@ class Cli
         return new self();
     }
 
-    public function run()
-    {
+    public function run() {
         $cli = new Application("Sophy");
 
         $cli->addCommands([

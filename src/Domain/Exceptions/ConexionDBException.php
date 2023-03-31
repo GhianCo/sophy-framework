@@ -2,6 +2,5 @@
 
 namespace Sophy\Domain\Exceptions;
 
-class ConexionDBException extends SophyException
-{
+class ConexionDBException extends SophyException {
 }

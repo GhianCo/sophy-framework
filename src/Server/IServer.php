@@ -4,7 +4,6 @@ namespace Sophy\Server;
 
 use Slim\Psr7\Request;
 
-interface IServer
-{
+interface IServer {
     public function getRequest(): Request;
 }

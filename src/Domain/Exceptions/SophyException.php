@@ -2,6 +2,5 @@
 
 namespace Sophy\Domain\Exceptions;
 
-abstract class SophyException extends \Exception
-{
+abstract class SophyException extends \Exception {
 }

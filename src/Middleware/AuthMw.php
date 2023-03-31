@@ -9,13 +9,11 @@ use Psr\Http\Server\MiddlewareInterface as Middleware;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Sophy\Domain\Exceptions\AuthException;
 
-class AuthMw implements Middleware
-{
+class AuthMw implements Middleware {
     /**
      * {@inheritdoc}
      */
-    public function process(Request $request, RequestHandler $handler): Response
-    {
+    public function process(Request $request, RequestHandler $handler): Response {
         $jwtHeader = $request->getHeaderLine('Authorization');
         $jwt_GET = isset($_GET["token"]) ? $_GET["token"] : false;
         if (!$jwtHeader && !$jwt_GET) {
@@ -33,8 +31,7 @@ class AuthMw implements Middleware
         return $handler->handle($request);
     }
 
-    protected function checkToken($token)
-    {
+    protected function checkToken($token) {
         try {
             return JWT::decode($token, $_SERVER['SECRET_KEY'], ['HS256']);
         } catch (\UnexpectedValueException $e) {

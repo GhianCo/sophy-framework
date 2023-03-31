@@ -4,8 +4,7 @@ namespace Sophy\Application\Actions;
 
 use JsonSerializable;
 
-class ActionPayload implements JsonSerializable
-{
+class ActionPayload implements JsonSerializable {
     private int $code;
 
     /**
@@ -30,8 +29,7 @@ class ActionPayload implements JsonSerializable
         $message = null,
         $pagination = null,
         $error = null
-    )
-    {
+    ) {
         $this->code = $code;
         $this->data = $data;
         $this->message = $message;
@@ -39,43 +37,37 @@ class ActionPayload implements JsonSerializable
         $this->error = $error;
     }
 
-    public function getStatusCode(): int
-    {
+    public function getStatusCode(): int {
         return $this->code;
     }
 
     /**
      * @return array|null|object
      */
-    public function getData()
-    {
+    public function getData() {
         return $this->data;
     }
 
     /**
      * @return string|object
      */
-    public function getMessage()
-    {
+    public function getMessage() {
         return $this->message;
     }
 
     /**
      * @return null|object
      */
-    public function getPagination()
-    {
+    public function getPagination() {
         return $this->pagination;
     }
 
-    public function getError(): ?ActionError
-    {
+    public function getError(): ?ActionError {
         return $this->error;
     }
 
     #[\ReturnTypeWillChange]
-    public function jsonSerialize(): array
-    {
+    public function jsonSerialize(): array {
         $payload = [
             'code' => $this->code
         ];

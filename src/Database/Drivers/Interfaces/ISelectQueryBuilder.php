@@ -2,8 +2,7 @@
 
 namespace Sophy\Database\Drivers\Interfaces;
 
-interface ISelectQueryBuilder extends IQueryBuilder
-{
+interface ISelectQueryBuilder extends IQueryBuilder {
     public function select(string ...$select): self;
 
     public function callFoundRows(bool $withCallFoundRows): self;
@@ -25,5 +24,4 @@ interface ISelectQueryBuilder extends IQueryBuilder
     public function leftJoin(string ...$leftJoin): self;
 
     public function rightJoin(string ...$rightJoin): self;
-
 }

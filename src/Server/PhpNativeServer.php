@@ -9,14 +9,11 @@ use Slim\Psr7\Headers;
 use Slim\Psr7\Request;
 use Slim\Psr7\Stream;
 
-class PhpNativeServer implements IServer
-{
-
+class PhpNativeServer implements IServer {
     /**
      * @inheritDoc
      */
-    public function getRequest(): Request
-    {
+    public function getRequest(): Request {
         $headers = Headers::createFromGlobals();
         $cookies = Cookies::parseHeader($headers->getHeader('Cookie', []));
 

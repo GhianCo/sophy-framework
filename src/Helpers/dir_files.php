@@ -1,11 +1,10 @@
 <?php
 
-function recursiveCopy($source, $target)
-{
+function recursiveCopy($source, $target) {
     if (is_dir($source)) {
         @mkdir($target, 0777, true);
         $d = dir($source);
-        while (FALSE !== ($entry = $d->read())) {
+        while (false !== ($entry = $d->read())) {
             if ($entry == '.' || $entry == '..') {
                 continue;
             }
@@ -23,8 +22,7 @@ function recursiveCopy($source, $target)
     }
 }
 
-function replaceFileContent($target, $replacement, $valueToChange = 'objectbase')
-{
+function replaceFileContent($target, $replacement, $valueToChange = 'objectbase') {
     $content1 = file_get_contents($target);
     if ($valueToChange == 'objectbase') {
         $content2 = preg_replace("/" . 'Objectbase' . "/", ucfirst($replacement), $content1);
@@ -35,21 +33,18 @@ function replaceFileContent($target, $replacement, $valueToChange = 'objectbase'
     file_put_contents($target, $content3);
 }
 
-function writeFile($fClass, $fName)
-{
-
+function writeFile($fClass, $fName) {
     if (!$handle = fopen($fName, 'w')) {
         exit;
     }
 
-    if (fwrite($handle, $fClass) === FALSE) {
+    if (fwrite($handle, $fClass) === false) {
         exit;
     }
     fclose($handle);
 }
 
-function stringInFileFound($path, $valueFind)
-{
+function stringInFileFound($path, $valueFind) {
     $handle = fopen($path, 'r');
     $valid = false;
 

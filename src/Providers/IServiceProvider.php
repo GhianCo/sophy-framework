@@ -2,8 +2,6 @@
 
 namespace Sophy\Providers;
 
-interface IServiceProvider
-{
+interface IServiceProvider {
     public function registerServices();
-
 }

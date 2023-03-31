@@ -3,12 +3,11 @@
 namespace Sophy\Container;
 
 use Sophy\App;
+
 use function DI\autowire;
 
-class Container
-{
-    public static function singleton(string $class, $build = null)
-    {
+class Container {
+    public static function singleton(string $class, $build = null) {
         if (is_null($build)) {
             App::$container->set($class, $build);
             return new $class();
@@ -16,16 +15,13 @@ class Container
         if (is_string($build)) {
             App::$container->set($class, autowire($build));
             return new $build();
-        } else if (is_callable($build)) {
+        } elseif (is_callable($build)) {
             App::$container->set($class, $build());
             return $build();
         }
     }
 
-    public static function resolve(string $class)
-    {
+    public static function resolve(string $class) {
         return App::$container->get($class) ?? null;
-
     }
-
 }

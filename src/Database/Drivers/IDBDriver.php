@@ -2,8 +2,7 @@
 
 namespace Sophy\Database\Drivers;
 
-interface IDBDriver
-{
+interface IDBDriver {
     public function connect(
         string $protocol,
         string $host,
