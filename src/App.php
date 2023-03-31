@@ -16,9 +16,7 @@ use Sophy\Server\IServer;
 use Slim\Factory\AppFactory;
 use Slim\App as Router;
 
-class App
-{
-
+class App {
     public static string $root;
 
     public Router $router;
@@ -31,8 +29,7 @@ class App
 
     public IDBDriver $database;
 
-    public static function bootstrap(string $root): self
-    {
+    public static function bootstrap(string $root): self {
         self::$root = $root;
 
         $containerBuilder = new ContainerBuilder();
@@ -48,19 +45,16 @@ class App
             ->setHttpHandlers()
             ->setUpDatabaseConnection()
             ->runServiceProviders('runtime');
-
     }
 
-    protected function loadConfig(): self
-    {
+    protected function loadConfig(): self {
         Dotenv::createImmutable(self::$root)->load();
         Config::load(self::$root . "/config");
 
         return $this;
     }
 
-    protected function runServiceProviders(string $type): self
-    {
+    protected function runServiceProviders(string $type): self {
         foreach (config("providers.$type", []) as $provider) {
             (new $provider())->registerServices();
         }
@@ -68,8 +62,7 @@ class App
         return $this;
     }
 
-    protected function setHttpHandlers(): self
-    {
+    protected function setHttpHandlers(): self {
         $this->router = singleton(Router::class, function () {
             AppFactory::setContainer(self::$container);
             $router = AppFactory::create();
@@ -84,8 +77,7 @@ class App
         return $this;
     }
 
-    protected function setUpDatabaseConnection(): self
-    {
+    protected function setUpDatabaseConnection(): self {
         $this->database = app(IDBDriver::class);
 
         $this->database->connect(
@@ -95,14 +87,12 @@ class App
             config("database.name"),
             config("database.username"),
             config("database.password"),
-            );
+        );
 
         return $this;
     }
 
-    public function run()
-    {
-
+    public function run() {
         $env = config('app.env');
 
         $callableResolver = $this->router->getCallableResolver();
