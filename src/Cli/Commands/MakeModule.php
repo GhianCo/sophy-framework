@@ -4,6 +4,7 @@ namespace Sophy\Cli\Commands;
 
 use Sophy\App;
 use Sophy\Database\DB;
+use Spatie\Regex\Regex;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,7 +32,7 @@ class MakeModule extends Command
         $this->output = new ConsoleOutput();
         $name = $input->getArgument("name");
 
-        $this->templatesDir = resourcesDirectory(). '/templates/';
+        $this->templatesDir = resourcesDirectory() . '/templates/';
         $this->appDir = App::$root . '/app/';
 
         $moduleIsValid = $this->validateHasTable($name);
@@ -44,6 +45,7 @@ class MakeModule extends Command
             $this->makeRepository($name);
             $this->makeRoute($name);
             $this->makeServices($name);
+            $this->addToRoute($name);
 
             $output->writeln("<info>Module created => $name</info>");
 
@@ -206,4 +208,76 @@ class MakeModule extends Command
         replaceFileContent($target . '/FindService.php', $name);
         replaceFileContent($target . '/UpdateService.php', $name);
     }
+
+    //Todo: Falta validar al no existir el archivo
+    private function addToRoute($name)
+    {
+        $locationRouteFile = App::$root . '/routes/api.php';
+        $routeModule = ucfirst($name) . 'Routes::group($group);';
+        $useRouteModule = 'use App\\' . ucfirst($name) . '\\' . ucfirst($name) . 'Routes;';
+
+        if (file_exists($locationRouteFile) && stringInFileFound($locationRouteFile, $routeModule)) {
+            return false;
+        }
+
+        $fileRoutesApi = @fopen($locationRouteFile, 'r');
+
+        $dir = App::$root . '/routes';
+
+        if ($fileRoutesApi) {
+            $startFunctionFound = false;
+            $endFunctionFound = false;
+
+            $routeApiLines = '';
+            while (!feof($fileRoutesApi)) {
+                $currentLine = fgets($fileRoutesApi);
+                if (!$startFunctionFound) {
+                    $startFunctionFound = Regex::match('/function\s*([A-z0-9]+)?\s*\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*\{(?:[^}{]+|\{(?:[^}{]+|\{[^}{]*\})*\})/', $currentLine)->hasMatch();
+                }
+
+                if ($startFunctionFound && !$endFunctionFound) {
+                    $endFunctionFound = Regex::match('/\}/', $currentLine)->hasMatch();
+                }
+
+                if ($startFunctionFound && $endFunctionFound) {
+                    $routeApiLines .= '    ' . $routeModule . PHP_EOL;
+
+                    preg_match_all('/^(.*\buse\b.*)$/m', $routeApiLines, $allOperatorUse);
+
+                    if (count($allOperatorUse)) {
+                        $lastOperatorFound = $allOperatorUse[count($allOperatorUse) - 1];
+                        $lastOperatorFound = $lastOperatorFound[count($lastOperatorFound) - 1];
+                        $routeApiLines = str_replace(trim($lastOperatorFound), trim($lastOperatorFound . PHP_EOL . $useRouteModule), $routeApiLines);
+                    }
+
+                }
+                $routeApiLines .= $currentLine;
+            }
+
+            @mkdir($dir, 0777, true);
+
+            writeFile($routeApiLines, $dir . '/api.php');
+
+        } else {
+            $__srcEntity = PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "use App\DefaultAction;" . PHP_EOL;
+            $__srcEntity .= "use Sophy\Routing\Route;" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "Route::get('/', DefaultAction::class);" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "Route::group('/api', function (\$group) {" . PHP_EOL;
+            $__srcEntity .= PHP_EOL;
+            $__srcEntity .= "});" . PHP_EOL;
+
+            $__srcEntity = "<?php " . $__srcEntity;
+
+            @mkdir($dir, 0777, true);
+
+            writeFile($__srcEntity, $dir . '/api.php');
+
+            $this->addToRoute($name);
+        }
+    }
+
 }

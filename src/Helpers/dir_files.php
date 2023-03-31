@@ -47,3 +47,19 @@ function writeFile($fClass, $fName)
     }
     fclose($handle);
 }
+
+function stringInFileFound($path, $valueFind)
+{
+    $handle = fopen($path, 'r');
+    $valid = false;
+
+    while (($buffer = fgets($handle)) !== false) {
+        if (strpos($buffer, $valueFind) !== false) {
+            $valid = $valueFind;
+            break;
+        }
+    }
+    fclose($handle);
+
+    return $valid;
+}
