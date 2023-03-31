@@ -233,6 +233,8 @@ class MakeModule extends Command {
                         $lastOperatorFound = $lastOperatorFound[count($lastOperatorFound) - 1];
                         $routeApiLines = str_replace(trim($lastOperatorFound), trim($lastOperatorFound . PHP_EOL . $useRouteModule), $routeApiLines);
                     }
+                    $startFunctionFound = false;
+                    $endFunctionFound = false;
                 }
                 $routeApiLines .= $currentLine;
             }
@@ -265,8 +267,7 @@ class MakeModule extends Command {
     private function addToRepositoryServiceProvider($name) {
         $locationRepositoryServiceProviderFile = App::$root . '/app/Providers/RepositoryServiceProvider.php';
         $repositoryServiceProviderModule = 'App::$container->set(I' . ucfirst($name) . 'Repository::class, \DI\autowire(' . ucfirst($name) . 'RepositoryMysql::class)->method(\'setTable\', \'' . $name . '\'));';
-        $useRouteModule = 'use App\\' . ucfirst($name) . '\Domain\I' . ucfirst($name) . 'Repository;
-                           use App\\' . ucfirst($name) . '\Infrastructure\\' . ucfirst($name) . 'RepositoryMysql;';
+        $useRepositoryServiceProviderModule = 'use App\\' . ucfirst($name) . '\Domain\I' . ucfirst($name) . 'Repository;' .PHP_EOL. 'use App\\' . ucfirst($name) . '\Infrastructure\\' . ucfirst($name) . 'RepositoryMysql;';
 
         if (file_exists($locationRepositoryServiceProviderFile) && stringInFileFound($locationRepositoryServiceProviderFile, $repositoryServiceProviderModule)) {
             return false;
@@ -285,7 +286,7 @@ class MakeModule extends Command {
             while (!feof($fileRepositoryServiceProviderApi)) {
                 $currentLine = fgets($fileRepositoryServiceProviderApi);
                 if (!$startFunctionFound) {
-                    $startFunctionFound = Regex::match('/function\s*([A-z0-9]+)?\s*\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*\{(?:[^}{]+|\{(?:[^}{]+|\{[^}{]*\})*\})/', $currentLine)->hasMatch();
+                    $startFunctionFound = Regex::match('/^.*\bfunction\b.*$/m', $currentLine)->hasMatch();
                 }
 
                 if ($startFunctionFound && !$endFunctionFound) {
@@ -293,15 +294,17 @@ class MakeModule extends Command {
                 }
 
                 if ($startFunctionFound && $endFunctionFound) {
-                    $repositoryServieProviderApiLines .= '    ' . $repositoryServiceProviderModule . PHP_EOL;
+                    $repositoryServieProviderApiLines .= '        ' . $repositoryServiceProviderModule . PHP_EOL;
 
                     preg_match_all('/^(.*\buse\b.*)$/m', $repositoryServieProviderApiLines, $allOperatorUse);
 
                     if (count($allOperatorUse)) {
                         $lastOperatorFound = $allOperatorUse[count($allOperatorUse) - 1];
                         $lastOperatorFound = $lastOperatorFound[count($lastOperatorFound) - 1];
-                        $repositoryServieProviderApiLines = str_replace(trim($lastOperatorFound), trim($lastOperatorFound . PHP_EOL . $useRouteModule), $repositoryServieProviderApiLines);
+                        $repositoryServieProviderApiLines = str_replace(trim($lastOperatorFound), trim($lastOperatorFound . PHP_EOL . $useRepositoryServiceProviderModule), $repositoryServieProviderApiLines);
                     }
+                    $startFunctionFound = false;
+                    $endFunctionFound = false;
                 }
                 $repositoryServieProviderApiLines .= $currentLine;
             }
@@ -309,25 +312,6 @@ class MakeModule extends Command {
             @mkdir($dir, 0777, true);
 
             writeFile($repositoryServieProviderApiLines, $dir . '/RepositoryServiceProvider.php');
-        } else {
-            $__srcEntity = PHP_EOL;
-            $__srcEntity .= PHP_EOL;
-            $__srcEntity .= "use App\DefaultAction;" . PHP_EOL;
-            $__srcEntity .= "use Sophy\Routing\Route;" . PHP_EOL;
-            $__srcEntity .= PHP_EOL;
-            $__srcEntity .= "Route::get('/', DefaultAction::class);" . PHP_EOL;
-            $__srcEntity .= PHP_EOL;
-            $__srcEntity .= "Route::group('/api', function (\$group) {" . PHP_EOL;
-            $__srcEntity .= PHP_EOL;
-            $__srcEntity .= "});" . PHP_EOL;
-
-            $__srcEntity = "<?php " . $__srcEntity;
-
-            @mkdir($dir, 0777, true);
-
-            writeFile($__srcEntity, $dir . '/RepositoryServiceProvider.php');
-
-            $this->addToRoute($name);
         }
     }
 }
