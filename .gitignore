@@ -27,3 +27,5 @@
 /.scannerwork/
 /.phpunit.result.cache
 /cdn
+
+.php-cs-fixer.cache
