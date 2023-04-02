@@ -6,8 +6,8 @@ use Sophy\Database\Drivers\IDBDriver;
 use Sophy\Database\Drivers\Mysql\DeleteClause;
 use Sophy\Database\Drivers\Mysql\GroupByClause;
 use Sophy\Database\Drivers\Mysql\InsertClause;
-use Sophy\Database\Drivers\Mysql\LimitOffsetClause;
 use Sophy\Database\Drivers\Mysql\OrderByClause;
+use Sophy\Database\Drivers\Mysql\PaginateClause;
 use Sophy\Database\Drivers\Mysql\SelectClause;
 use Sophy\Database\Drivers\Mysql\UpdateClause;
 use Sophy\Database\Drivers\Mysql\WhereClause;
@@ -22,7 +22,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     use WhereClause;
     use GroupByClause;
     use OrderByClause;
-    use LimitOffsetClause;
+    use PaginateClause;
 
     use InsertClause;
 

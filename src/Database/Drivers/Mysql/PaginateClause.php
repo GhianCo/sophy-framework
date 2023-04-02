@@ -4,7 +4,7 @@ namespace Sophy\Database\Drivers\Mysql;
 
 use PDO;
 
-trait LimitOffsetClause
+trait PaginateClause
 {
 
     use ProcessClause;
