@@ -9,7 +9,4 @@ interface BaseRepository {
 
     public function delete(BaseEntity $entity);
 
-    public function fetchRowByCriteria(array $criteria = []);
-
-    public function fetchRowsByCriteria(array $criteria = []);
 }
