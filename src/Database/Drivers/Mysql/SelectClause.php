@@ -57,7 +57,7 @@ trait SelectClause
 
         $array = [];
         foreach ($this->source_value as $value) {
-            if (is_array($value)) {
+            if (is_array($value) && count($value)) {
                 $array[] = implode(' ', $value);
             }
         }

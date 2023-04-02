@@ -2,6 +2,7 @@
 
 namespace App\Objectbase\Application\Actions;
 
+use App\Client\Application\Services\DeleteService;
 use App\Objectbase\Application\Services\CreateService;
 use App\Objectbase\Application\Services\FindService;
 use App\Objectbase\Application\Services\UpdateService;
@@ -10,6 +11,12 @@ use Sophy\Container\Container;
 
 abstract class Base extends Action
 {
+
+    protected function getFindService(): FindService
+    {
+        return Container::resolve(FindService::class);
+    }
+
     protected function getCreateService()
     {
         return Container::resolve(CreateService::class);
@@ -20,8 +27,8 @@ abstract class Base extends Action
         return Container::resolve(UpdateService::class);
     }
 
-    protected function getFindService(): FindService
+    protected function getDeleteService()
     {
-        return Container::resolve(FindService::class);
+        return Container::resolve(DeleteService::class);
     }
 }

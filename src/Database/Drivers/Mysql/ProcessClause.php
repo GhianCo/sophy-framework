@@ -23,6 +23,10 @@ trait ProcessClause
         $s_index = $this->sql_stractur($struct_name);
         $this->source_value[$s_index] = [];
     }
+    protected function clearSourceValue()
+    {
+        $this->source_value = [];
+    }
 
     protected function method_in_maker(array $list, $callback)
     {
@@ -191,7 +195,8 @@ trait ProcessClause
         return "UPDATE `$this->table` SET " . implode(',', $params) . " $extra";
     }
 
-    protected function makeUpdateQueryIncrement(string $column, $value = 1, $action = '+'){
+    protected function makeUpdateQueryIncrement(string $column, $value = 1, $action = '+')
+    {
 
         $values = [];
 
@@ -200,13 +205,19 @@ trait ProcessClause
         $params = [];
         $params[] = "$column = $column $action $value";
 
-        foreach($values as $name=>$value){
-            $params[] = $this->fix_column_name($name)['name'].' = '. $this->add_to_param_auto_name($value);
+        foreach ($values as $name => $value) {
+            $params[] = $this->fix_column_name($name)['name'] . ' = ' . $this->add_to_param_auto_name($value);
         }
 
         $extra = $this->makeSourceValueString();
 
-        return "UPDATE `$this->table` SET ".implode(',', $params)." $extra";
+        return "UPDATE `$this->table` SET " . implode(',', $params) . " $extra";
+    }
+
+    protected function makeDeleteQueryString()
+    {
+        $extra = $this->makeSourceValueString();
+        return "DELETE FROM `$this->table` $extra";
     }
 
     protected function sql_stractur($key = null)

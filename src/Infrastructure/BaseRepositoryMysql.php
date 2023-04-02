@@ -3,6 +3,7 @@
 namespace Sophy\Infrastructure;
 
 use Sophy\Database\Drivers\IDBDriver;
+use Sophy\Database\Drivers\Mysql\DeleteClause;
 use Sophy\Database\Drivers\Mysql\GroupByClause;
 use Sophy\Database\Drivers\Mysql\InsertClause;
 use Sophy\Database\Drivers\Mysql\LimitOffsetClause;
@@ -26,6 +27,8 @@ abstract class BaseRepositoryMysql implements BaseRepository
     use InsertClause;
 
     use UpdateClause;
+
+    use DeleteClause;
 
     public IDBDriver $driver;
 
@@ -83,7 +86,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     {
         try {
             if (isset($entity->{$this->primary_key})) {
-                $this->setAction('update')->where($this->primary_key, $entity->{$this->primary_key})->update($entity);
+                $this->where($this->primary_key, $entity->{$this->primary_key})->update($entity);
             } else {
                 $id = $this->insertGetId($entity);
                 $entity->{$this->primary_key} = $id;
@@ -97,11 +100,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     public function delete(BaseEntity $entity)
     {
         try {
-            $statement = $this->driver->statement(
-                'DELETE FROM ' . $this->getTable() . ' WHERE ' . $this->getKeyName() . '=:' . $this->getKeyName() . ' LIMIT 1',
-                [':' . $this->getKeyName() => $entity->{$this->getKeyName()}]
-            );
-            return $statement->rowCount();
+            return $this->deleteRow($entity);
         } catch (\Exception $exception) {
             throw new ConexionDBException($exception->getMessage(), 500);
         }
