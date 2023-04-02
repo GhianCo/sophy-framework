@@ -2,12 +2,13 @@
 
 namespace App\Objectbase;
 
-use App\Objectbase\Application\Actions\Create;
 use App\Objectbase\Application\Actions\GetAll;
-use App\Objectbase\Application\Actions\Update;
 use App\Objectbase\Application\Actions\GetOne;
 use App\Objectbase\Application\Actions\GetByQuery;
 use App\Objectbase\Application\Actions\GetByBody;
+use App\Objectbase\Application\Actions\Create;
+use App\Objectbase\Application\Actions\Update;
+use App\Objectbase\Application\Actions\Delete;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
 
 class ObjectbaseRoutes
@@ -23,6 +24,7 @@ class ObjectbaseRoutes
             $group->post('/byBody', GetByBody::class);
 
             $group->put('/{id}', Update::class);
+            $group->delete('/{id}', Delete::class);
         });
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Client\Application\Actions;
+namespace App\Objectbase\Application\Actions;
 
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -14,7 +14,7 @@ class Delete extends Base
         $objectbaseId = (int)$this->resolveArg('id');
         $objectbase = $this->getDeleteService()->delete((int)$objectbaseId);
 
-        return $this->respondWithData($objectbase, 'Client eliminado con éxito');
+        return $this->respondWithData($objectbase, 'Objectbase eliminado con éxito');
     }
 }
 

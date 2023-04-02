@@ -84,6 +84,7 @@ class MakeModule extends Command {
         replaceFileContent($target . '/GetByQuery.php', $name);
         replaceFileContent($target . '/GetOne.php', $name);
         replaceFileContent($target . '/Update.php', $name);
+        replaceFileContent($target . '/Delete.php', $name);
     }
 
     private function makeEntity($name) {
@@ -192,6 +193,7 @@ class MakeModule extends Command {
         replaceFileContent($target . '/CreateService.php', $name);
         replaceFileContent($target . '/FindService.php', $name);
         replaceFileContent($target . '/UpdateService.php', $name);
+        replaceFileContent($target . '/DeleteService.php', $name);
     }
 
     //Todo: Falta validar al no existir el archivo
