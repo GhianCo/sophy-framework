@@ -65,6 +65,7 @@ trait LimitOffsetClause
 
     public function paginate(int $value, int $take = 15)
     {
+        $this->callFoundRows();
         $data = $this->page($value - 1, $take);
 
         $result = $this->driver->query("SELECT FOUND_ROWS() AS foundRows");

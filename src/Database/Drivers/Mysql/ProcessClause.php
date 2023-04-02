@@ -153,11 +153,7 @@ trait ProcessClause
 
     public function get_value($param, $name)
     {
-        if ($this->config->getFetch() == Config::FETCH_CLASS) {
-            return $param->{$name};
-        } else {
-            return $param[$name];
-        }
+        return $param->{$name};
     }
 
     public function get_params()
@@ -168,6 +164,49 @@ trait ProcessClause
     public function get_source_value()
     {
         return $this->source_value;
+    }
+
+    protected function makeInsertQueryString($values)
+    {
+        $param_name = [];
+        $param_value_name_list = [];
+
+        foreach ($values as $name => $value) {
+            $param_name[] = $this->fix_column_name($name)['name'];
+            $param_value_name_list[] = $this->add_to_param_auto_name($value);
+        }
+
+        return "INSERT INTO `$this->table` (" . implode(',', $param_name) . ") VALUES (" . implode(',', $param_value_name_list) . ")";
+    }
+
+    protected function makeUpdateQueryString($values)
+    {
+        $params = [];
+        foreach ($values as $name => $value) {
+            $params[] = $this->fix_column_name($name)['name'] . ' = ' . $this->add_to_param_auto_name($value);
+        }
+
+        $extra = $this->makeSourceValueString();
+
+        return "UPDATE `$this->table` SET " . implode(',', $params) . " $extra";
+    }
+
+    protected function makeUpdateQueryIncrement(string $column, $value = 1, $action = '+'){
+
+        $values = [];
+
+        $column = $this->fix_column_name($column)['name'];
+
+        $params = [];
+        $params[] = "$column = $column $action $value";
+
+        foreach($values as $name=>$value){
+            $params[] = $this->fix_column_name($name)['name'].' = '. $this->add_to_param_auto_name($value);
+        }
+
+        $extra = $this->makeSourceValueString();
+
+        return "UPDATE `$this->table` SET ".implode(',', $params)." $extra";
     }
 
     protected function sql_stractur($key = null)

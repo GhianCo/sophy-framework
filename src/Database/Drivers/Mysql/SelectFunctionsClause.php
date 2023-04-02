@@ -28,7 +28,6 @@ class SelectFunctionsClause
         return new AsFieldClause($this);
     }
 
-
     /**
      * Retrieve the "count" result of the query.
      *

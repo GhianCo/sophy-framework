@@ -39,10 +39,13 @@ class App {
 
         $app = app(self::class);
 
+        date_default_timezone_set(config('app.timezone', 'UTC'));
+
         return $app
             ->loadConfig()
             ->runServiceProviders('boot')
             ->setHttpHandlers()
+            ->cors()
             ->setUpDatabaseConnection()
             ->runServiceProviders('runtime');
     }
@@ -74,6 +77,23 @@ class App {
             return $this->server->getRequest();
         });
 
+        return $this;
+    }
+
+    protected function cors() {
+        if (isset($_SERVER['HTTP_ORIGIN'])) {
+            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Max-Age: 86400');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+                header('Access-Control-Allow-Methods: PUT, GET, POST, OPTIONS, DELETE');
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+                header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+            exit(0);
+        }
         return $this;
     }
 

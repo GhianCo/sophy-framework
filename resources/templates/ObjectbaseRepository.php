@@ -15,11 +15,7 @@ class ObjectbaseRepositoryMysql extends BaseRepositoryMysql implements IObjectba
     public function checkAndGetObjectbaseOrFail(int $id): Objectbase
     {
 
-        $whereParams = array(
-            array("field" => "objectbase_id", "value" => $id, "operator" => "=")
-        );
-
-        $objectbase = $this->setWhereParams($whereParams)->execQueryRow();
+        $objectbase = $this->where('objectbase_id', '=', $id)->getOne();
 
         if (!$objectbase) {
             throw new ObjectbaseException('No se encontró el objectbase con id: ' . $id . '.', 404);

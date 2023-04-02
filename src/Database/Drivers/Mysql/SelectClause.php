@@ -42,17 +42,17 @@ trait SelectClause
     protected function makeSelectQueryString()
     {
 
-        $this->addToSourceArray('SELECT', "SELECT");
+        $this->addToSourceArray('SELECT', "SELECT" . ($this->callFoundRows ? ' SQL_CALC_FOUND_ROWS' : ''));
         $this->addToSourceArray('FROM', "FROM `$this->table`");
 
         if (count($this->getSourceValueItem('DISTINCT')) == 0) {
             $this->select('*');
         }
 
-        return $this->makeSourceValueStrign();
+        return $this->makeSourceValueString();
     }
 
-    protected function makeSourceValueStrign(){
+    protected function makeSourceValueString(){
         ksort($this->source_value);
 
         $array = [];

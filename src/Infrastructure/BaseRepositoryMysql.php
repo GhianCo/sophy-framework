@@ -2,10 +2,13 @@
 
 namespace Sophy\Infrastructure;
 
-use Sophy\Constants;
 use Sophy\Database\Drivers\IDBDriver;
+use Sophy\Database\Drivers\Mysql\GroupByClause;
+use Sophy\Database\Drivers\Mysql\InsertClause;
 use Sophy\Database\Drivers\Mysql\LimitOffsetClause;
+use Sophy\Database\Drivers\Mysql\OrderByClause;
 use Sophy\Database\Drivers\Mysql\SelectClause;
+use Sophy\Database\Drivers\Mysql\UpdateClause;
 use Sophy\Database\Drivers\Mysql\WhereClause;
 use Sophy\Domain\BaseEntity;
 use Sophy\Domain\BaseRepository;
@@ -16,13 +19,23 @@ abstract class BaseRepositoryMysql implements BaseRepository
 {
     use SelectClause;
     use WhereClause;
+    use GroupByClause;
+    use OrderByClause;
     use LimitOffsetClause;
+
+    use InsertClause;
+
+    use UpdateClause;
 
     public IDBDriver $driver;
 
     protected $config;
     protected $params = [];
+    protected $action = 'select';
+    protected $callFoundRows = false;
     protected $source_value = [];
+
+    protected $primary_key = 'id';
 
     private $table;
     private $nameSpaceEntity = 'App\\%s\\Domain\\Entities\\%s';
@@ -39,6 +52,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     public function setTable(string $table)
     {
         $this->table = $table;
+        $this->primary_key = $this->table . '_id';
     }
 
     /**
@@ -49,58 +63,32 @@ abstract class BaseRepositoryMysql implements BaseRepository
         return $this->table;
     }
 
-    public function insert(BaseEntity $entity): int
+    public function setAction($action)
     {
-        try {
-            $insertQuery = $this->insertQuery($this->getTable());
-
-            foreach ($entity as $key => $value) {
-                if (!isset($value)) {
-                    continue;
-                }
-                $insertQuery->columns($key);
-            }
-
-            $binds = [];
-            foreach ($entity as $key => &$value) {
-                if (!isset($value)) {
-                    continue;
-                }
-                $binds[':' . $key] = $value;
-            }
-
-            $statement = $this->driver->statement($insertQuery, $binds);
-
-            if ($statement->rowCount() === 1) {
-                return $this->driver->lastInsertId();
-            } else {
-                return Constants::NOT;
-            }
-        } catch (\Exception $exception) {
-            throw new ConexionDBException($exception->getMessage(), 500);
-        }
+        $this->action = $action;
+        return $this;
     }
 
-    public function update(BaseEntity $entity): void
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    public function callFoundRows()
+    {
+        return $this->callFoundRows = true;
+    }
+
+    public function save(BaseEntity $entity): BaseEntity
     {
         try {
-            $updateQuery = $this->updateQuery($this->getTable());
-
-            foreach ($entity as $key => $value) {
-                if ($key == $this->getKeyName()) {
-                    continue;
-                }
-                $updateQuery->set($key);
+            if (isset($entity->{$this->primary_key})) {
+                $this->setAction('update')->where($this->primary_key, $entity->{$this->primary_key})->update($entity);
+            } else {
+                $id = $this->insertGetId($entity);
+                $entity->{$this->primary_key} = $id;
             }
-
-            $updateQuery->where($this->getKeyName() . ' = :' . $this->getKeyName());
-
-            $binds = [];
-            foreach ($entity as $key => &$value) {
-                $binds[':' . $key] = $value;
-            }
-
-            $this->driver->statement($updateQuery, $binds);
+            return $entity;
         } catch (\Exception $exception) {
             throw new ConexionDBException($exception->getMessage(), 500);
         }
@@ -119,7 +107,44 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
     }
 
-    protected function execute($query, $params = [], $return = false)
+    public function first($columns = [])
+    {
+        $db = $this->limit(1);
+
+        if (count($columns)) {
+            $db->select($columns);
+        }
+
+        return $db->getOne();
+    }
+
+    public function find($id, $columns = [])
+    {
+        return $this->where($this->primary_key, $id)->first($columns);
+    }
+
+    /**
+     * Determine if any rows exist for the current query.
+     *
+     * @return bool
+     */
+    public function exists()
+    {
+        $result = $this->first();
+        return $result ? true : false;
+    }
+
+    /**
+     * Determine if no rows exist for the current query.
+     *
+     * @return bool
+     */
+    public function doesntExist()
+    {
+        return !$this->exists();
+    }
+
+    protected function execute($query, $params = [], $return = false, $isList = true)
     {
         $this->params = $params;
 
@@ -129,11 +154,17 @@ abstract class BaseRepositoryMysql implements BaseRepository
             $stmt = $this->driver->statement($query, $this->params);
         }
 
-        $table = ucfirst($this->getTable());
-        $stmt->setFetchMode(PDO::FETCH_CLASS, sprintf($this->nameSpaceEntity, $table, $table));
-
         if ($return) {
-            $result = $stmt->fetchAll();
+
+            $table = ucfirst($this->getTable());
+
+            if ($isList == true) {
+                $stmt->setFetchMode(PDO::FETCH_CLASS, sprintf($this->nameSpaceEntity, $table, $table));
+                $result = $stmt->fetchAll();
+            } else {
+                $result = $stmt->fetchObject(sprintf($this->nameSpaceEntity, $table, $table));
+            }
+
         } else {
             $result = $stmt->rowCount();
         }
@@ -147,94 +178,10 @@ abstract class BaseRepositoryMysql implements BaseRepository
         return $this->execute($query, $this->params, true);
     }
 
-    protected function execQueryRows()
+    public function getOne()
     {
-        try {
-            $selectQuery = $this->selectQuery($this->getTable(), is_array($this->getColumns()) && count($this->getColumns()) ? implode(', ', $this->getColumns()) : '*')
-                ->callFoundRows(true)
-                ->where($this->buildWhere());
-
-            foreach ($this->getJoins() as $join) {
-                if (isset($join['interception'])) {
-                    $interception = $join['interception'] . 'Join';
-                    $selectQuery->{$interception}($join['table'] . ' ON ' . $join['table'] . '.' . $join['tablePK'] . ' = ' . $this->getTable() . '.' . $join['tablePK']);
-                } else {
-                    $selectQuery->innerJoin($join['table'] . ' ON ' . $join['table'] . '.' . $join['tablePK'] . ' = ' . $this->getTable() . '.' . $join['tablePK']);
-                }
-            }
-
-            foreach ($this->getOrderParams() as $op) {
-                $selectQuery->orderBy($op['field'] . ' ' . (isset($op['order']) ? $op['order'] : ''));
-            }
-
-            if ($this->getPerPage() != 0 && $this->getPerPage() != Constants::UNDEFINED) {
-                $selectQuery->page(($this->getPage() - 1) * $this->getPerPage());
-                $selectQuery->perPage($this->getPerPage());
-            }
-
-            $binds = [];
-            foreach ($this->getWhereParams() as $wp) {
-                if (!isset($wp['value']) || is_array($wp['value'])) {
-                    continue;
-                }
-                $fieldClean = str_replace('.', '', $wp['field']);
-                $binds[':' . (is_array($wp["field"]) ? implode('', $wp["field"]) : $fieldClean)] = $wp["value"];
-            }
-
-            $statement = $this->driver->statement($selectQuery, $binds);
-
-            $table = ucfirst($this->getTable());
-            $statement->setFetchMode(PDO::FETCH_CLASS, sprintf($this->nameSpaceEntity, $table, $table));
-
-            $result = $this->driver->query("SELECT FOUND_ROWS() AS foundRows");
-            $result->setFetchMode(PDO::FETCH_ASSOC);
-            $total = $result->fetch()["foundRows"];
-
-            $startIndex = (($this->getPage() - 1) * $this->getPerPage()) + 1;
-            $endIndex = min(($this->getPerPage() * $this->getPage()), $total);
-            $totalPages = ceil($total / ($this->getPerPage() > 0 ? $this->getPerPage() : 1));
-
-            return [
-                'data' => $statement->fetchAll(),
-                'pagination' => [
-                    'totalRows' => $total,
-                    'totalPages' => $totalPages,
-                    'currentPage' => $this->getPage(),
-                    'perPage' => $this->getPerPage(),
-                    'startIndex' => $startIndex,
-                    'endIndex' => $endIndex,
-                    'hasRowsToLeft' => $startIndex === 1,
-                    'hasRowsToRight' => $endIndex === $total
-                ]
-            ];
-        } catch (\Exception $exception) {
-            throw new ConexionDBException($exception->getMessage(), 500);
-        }
+        $query = $this->makeSelectQueryString();
+        return $this->execute($query, $this->params, true, false);
     }
 
-    protected function execQueryRow()
-    {
-        try {
-            $selectQuery = $this->selectQuery($this->getTable(), is_array($this->getColumns()) && count($this->getColumns()) ? implode(', ', $this->getColumns()) : '*')
-                ->where($this->buildWhere())
-                ->page(1);
-
-            foreach ($this->getJoins() as $join) {
-                $selectQuery->innerJoin($join['table'] . ' ON ' . $join['table'] . '.' . $join['tablePK'] . ' = ' . $this->getTable() . '.' . $join['tablePK']);
-            }
-
-            $binds = [];
-            foreach ($this->getWhereParams() as $wp) {
-                $fieldClean = str_replace('.', '', $wp['field']);
-                $binds[':' . (is_array($wp["field"]) ? implode('', $wp["field"]) : $fieldClean)] = $wp["value"];
-            }
-
-            $statement = $this->driver->statement($selectQuery, $binds);
-            $table = ucfirst($this->getTable());
-
-            return $statement->fetchObject(sprintf($this->nameSpaceEntity, $table, $table));
-        } catch (\Exception $exception) {
-            throw new ConexionDBException($exception->getMessage(), 500);
-        }
-    }
 }

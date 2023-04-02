@@ -15,9 +15,8 @@ final class FindService extends Base
         if ($perPage < 1) {
             $perPage = self::DEFAULT_PER_PAGE_PAGINATION;
         }
-        $criteria = array('page' => $page, 'perPage' => $perPage);
 
-        $objectbaseResult = $this->objectbaseRepository->fetchRowsByCriteria($criteria);
+        $objectbaseResult = $this->objectbaseRepository->paginate($page, $perPage);
 
         $objectbaseData = $this->mapper->mapMultiple($objectbaseResult['data'], ObjectbaseDTO::class);
 
@@ -26,7 +25,7 @@ final class FindService extends Base
 
     public function getAll()
     {
-        return $this->objectbaseRepository->fetchRowsByCriteria();
+        return $this->objectbaseRepository->get();
     }
 
     public function getObjectbase($objectbaseId)
@@ -36,16 +35,10 @@ final class FindService extends Base
 
     public function getBySearch($querySearch)
     {
-        $whereParams = array();
-        $orderParams = array();
-
         if ($querySearch != Constants::UNDEFINED) {
         }
 
-        $criteria = array('whereParams' => $whereParams, 'orderParams' => $orderParams);
-
-        return $this->objectbaseRepository->fetchRowsByCriteria($criteria)['data'];
-
+        return $this->objectbaseRepository->get()['data'];
     }
 
     public function searchByParams($input)
@@ -56,17 +49,11 @@ final class FindService extends Base
         $page = $requestBody->page;
         $perPage = $requestBody->perPage;
 
-        $whereParams = array();
-
         if ($query != Constants::UNDEFINED) {}
 
         if ($active != Constants::UNDEFINED) {}
 
-        $orderParams = array();
-
-        $criteria = array('whereParams' => $whereParams, 'orderParams' => $orderParams, 'page' => $page, 'perPage' => $perPage);
-
-        $providers = $this->objectbaseRepository->fetchRowsByCriteria($criteria);
+        $providers = $this->objectbaseRepository->get();
 
         return $providers;
     }

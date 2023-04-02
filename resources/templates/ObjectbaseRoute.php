@@ -9,7 +9,6 @@ use App\Objectbase\Application\Actions\GetOne;
 use App\Objectbase\Application\Actions\GetByQuery;
 use App\Objectbase\Application\Actions\GetByBody;
 use Slim\Interfaces\RouteCollectorProxyInterface as Group;
-use App\Objectbase\Application\Actions\CreateValidator;
 
 class ObjectbaseRoutes
 {
@@ -20,7 +19,7 @@ class ObjectbaseRoutes
             $group->get('/byQuery', GetByQuery::class);
             $group->get('/{id}', GetOne::class);
 
-            $group->post('', Create::class)->add(CreateValidator::class);
+            $group->post('', Create::class);
             $group->post('/byBody', GetByBody::class);
 
             $group->put('/{id}', Update::class);

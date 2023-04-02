@@ -6,4 +6,5 @@ return [
     'url' => env('APP_URL', 'localhost'),
     'domain' => env('APP_DOMAIN', 'localhost'),
     'pathRoute' => env('PATH_ROUTE', '/'),
+    'timezone' => env('TIME_ZONE', 'America/Lima'),
 ];

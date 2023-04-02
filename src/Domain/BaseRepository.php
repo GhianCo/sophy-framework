@@ -3,9 +3,7 @@
 namespace Sophy\Domain;
 
 interface BaseRepository {
-    public function insert(BaseEntity $entity): int;
-
-    public function update(BaseEntity $entity): void;
+    public function save(BaseEntity $entity): BaseEntity;
 
     public function delete(BaseEntity $entity);
 
