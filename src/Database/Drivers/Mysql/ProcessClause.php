@@ -9,23 +9,23 @@ trait ProcessClause
     public function getSourceValueItem($struct_name)
     {
         $s_index = $this->sql_stractur($struct_name);
-        return $this->SOURCE_VALUE[$s_index] ?? [];
+        return $this->sourceValue[$s_index] ?? [];
     }
 
     protected function addToSourceArray($struct_name, $value)
     {
         $s_index = $this->sql_stractur($struct_name);
-        $this->source_value[$s_index][] = $value;
+        $this->sourceValue[$s_index][] = $value;
     }
 
     protected function clearSource($struct_name)
     {
         $s_index = $this->sql_stractur($struct_name);
-        $this->source_value[$s_index] = [];
+        $this->sourceValue[$s_index] = [];
     }
     protected function clearSourceValue()
     {
-        $this->source_value = [];
+        $this->sourceValue = [];
     }
 
     protected function method_in_maker(array $list, $callback)
@@ -165,9 +165,9 @@ trait ProcessClause
         return $this->params;
     }
 
-    public function get_source_value()
+    public function get_sourceValue()
     {
-        return $this->source_value;
+        return $this->sourceValue;
     }
 
     protected function makeInsertQueryString($values)

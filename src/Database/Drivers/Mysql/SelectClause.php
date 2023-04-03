@@ -53,10 +53,10 @@ trait SelectClause
     }
 
     protected function makeSourceValueString(){
-        ksort($this->source_value);
+        ksort($this->sourceValue);
 
         $array = [];
-        foreach ($this->source_value as $value) {
+        foreach ($this->sourceValue as $value) {
             if (is_array($value) && count($value)) {
                 $array[] = implode(' ', $value);
             }

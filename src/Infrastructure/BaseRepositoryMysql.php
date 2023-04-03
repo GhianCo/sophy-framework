@@ -36,9 +36,9 @@ abstract class BaseRepositoryMysql implements BaseRepository
     protected $params = [];
     protected $action = 'select';
     protected $callFoundRows = false;
-    protected $source_value = [];
+    protected $sourceValue = [];
 
-    protected $primary_key = 'id';
+    protected $primaryKey = 'id';
 
     private $table;
     private $nameSpaceEntity = 'App\\%s\\Domain\\Entities\\%s';
@@ -55,7 +55,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     public function setTable(string $table)
     {
         $this->table = $table;
-        $this->primary_key = $this->table . '_id';
+        $this->primaryKey = $this->table . '_id';
     }
 
     /**
