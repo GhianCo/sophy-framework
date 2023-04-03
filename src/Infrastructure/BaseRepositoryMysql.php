@@ -88,11 +88,11 @@ abstract class BaseRepositoryMysql implements BaseRepository
     public function save(BaseEntity $entity): BaseEntity
     {
         try {
-            if (isset($entity->{$this->primary_key})) {
-                $this->where($this->primary_key, $entity->{$this->primary_key})->update($entity);
+            if (isset($entity->{$this->primaryKey})) {
+                $this->where($this->primaryKey, $entity->{$this->primaryKey})->update($entity);
             } else {
                 $id = $this->insertGetId($entity);
-                $entity->{$this->primary_key} = $id;
+                $entity->{$this->primaryKey} = $id;
             }
             return $entity;
         } catch (\Exception $exception) {
@@ -122,7 +122,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
 
     public function find($id, $columns = [])
     {
-        return $this->where($this->primary_key, $id)->first($columns);
+        return $this->where($this->primaryKey, $id)->first($columns);
     }
 
     /**
