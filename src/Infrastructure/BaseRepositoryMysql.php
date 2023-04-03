@@ -4,6 +4,7 @@ namespace Sophy\Infrastructure;
 
 use Sophy\Database\Drivers\IDBDriver;
 use Sophy\Database\Drivers\Mysql\DeleteClause;
+use Sophy\Database\Drivers\Mysql\FunctionsClause;
 use Sophy\Database\Drivers\Mysql\GroupByClause;
 use Sophy\Database\Drivers\Mysql\InsertClause;
 use Sophy\Database\Drivers\Mysql\OrderByClause;
@@ -23,6 +24,8 @@ abstract class BaseRepositoryMysql implements BaseRepository
     use GroupByClause;
     use OrderByClause;
     use PaginateClause;
+
+    use FunctionsClause;
 
     use InsertClause;
 
