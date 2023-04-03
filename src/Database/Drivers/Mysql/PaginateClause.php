@@ -2,8 +2,6 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-use PDO;
-
 trait PaginateClause
 {
 
@@ -69,7 +67,7 @@ trait PaginateClause
         $data = $this->page($value - 1, $take);
 
         $result = $this->driver->query("SELECT FOUND_ROWS() AS foundRows");
-        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->setFetchMode($this->driver->getConnection()::FETCH_ASSOC);
         $total = $result->fetch()["foundRows"];
 
         $startIndex = (($value - 1) * $take) + 1;

@@ -15,7 +15,6 @@ use Sophy\Database\Drivers\Mysql\WhereClause;
 use Sophy\Domain\BaseEntity;
 use Sophy\Domain\BaseRepository;
 use Sophy\Domain\Exceptions\ConexionDBException;
-use PDO;
 
 abstract class BaseRepositoryMysql implements BaseRepository
 {
@@ -161,7 +160,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
             $table = ucfirst($this->getTable());
 
             if ($isList == true) {
-                $stmt->setFetchMode(PDO::FETCH_CLASS, sprintf($this->nameSpaceEntity, $table, $table));
+                $stmt->setFetchMode($this->driver->getConnection()::FETCH_CLASS, sprintf($this->nameSpaceEntity, $table, $table));
                 $result = $stmt->fetchAll();
             } else {
                 $result = $stmt->fetchObject(sprintf($this->nameSpaceEntity, $table, $table));

@@ -22,12 +22,13 @@ class PdoDriver implements IDBDriver {
         $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     }
 
-    public function close() {
-        $this->pdo = null;
-    }
+    /**
+     * @return PDO
+     */
 
-    public function lastInsertId() {
-        return $this->pdo->lastInsertId();
+    public function getConnection()
+    {
+        return $this->pdo;
     }
 
     public function statement(string $query, array $bind = []) {
@@ -39,4 +40,14 @@ class PdoDriver implements IDBDriver {
     public function query(string $query) {
         return $this->pdo->query($query);
     }
+
+    public function lastInsertId() {
+        return $this->pdo->lastInsertId();
+    }
+
+    public function close() {
+        $this->pdo = null;
+    }
+
+
 }
