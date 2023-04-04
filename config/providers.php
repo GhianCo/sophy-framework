@@ -8,6 +8,7 @@ return [
     'runtime' => [
         App\Providers\RouteServiceProvider::class,
         App\Providers\RepositoryServiceProvider::class,
+        App\Providers\ValidatorServiceProvider::class,
     ],
     'cli' => [
         Sophy\Providers\DatabaseDriverServiceProvider::class,
