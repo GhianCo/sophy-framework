@@ -10,13 +10,12 @@ use App\Objectbase\Application\Actions\Create;
 use App\Objectbase\Application\Actions\Update;
 use App\Objectbase\Application\Actions\Delete;
 use App\Objectbase\Application\Actions\CreateValidator;
-use Sophy\Routing\Route;
 
 class ObjectbaseRoutes
 {
-    public static function group(Route $routeGroup)
+    public static function group($routeGroup)
     {
-        $routeGroup->group('/objectbase', function (Route $route) {
+        $routeGroup->group('/objectbase', function ($route) {
             $route->get('', GetAll::class);
             $route->get('/byQuery', GetByQuery::class);
             $route->get('/{id}', GetOne::class);
