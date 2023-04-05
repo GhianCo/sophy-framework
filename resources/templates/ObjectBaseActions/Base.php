@@ -2,7 +2,7 @@
 
 namespace App\Objectbase\Application\Actions;
 
-use App\Client\Application\Services\DeleteService;
+use App\Objectbase\Application\Services\DeleteService;
 use App\Objectbase\Application\Services\CreateService;
 use App\Objectbase\Application\Services\FindService;
 use App\Objectbase\Application\Services\UpdateService;
