@@ -13,11 +13,7 @@ class DefaultAction extends Action
     {
         $appDomain = config('app.domain');
 
-        $endpoints = [
-            'client' => $appDomain . '/api/client',
-            'device' => $appDomain . '/api/device',
-            'pet' => $appDomain . '/api/pet',
-        ];
+        $endpoints = [];
         $data = [
             'endpoints' => $endpoints,
             'version' => self::API_VERSION,
