@@ -2,9 +2,7 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-trait PaginateClause
-{
-
+trait PaginateClause {
     use ProcessClause;
 
     /**
@@ -13,8 +11,7 @@ trait PaginateClause
      * @param int $value
      * @return $this
      */
-    public function limit(int $value)
-    {
+    public function limit(int $value) {
         $this->addToSourceArray('LIMIT', "LIMIT $value");
         return $this;
     }
@@ -25,8 +22,7 @@ trait PaginateClause
      * @param int $value
      * @return mixed
      */
-    public function take(int $value)
-    {
+    public function take(int $value) {
         return $this->limit($value);
     }
 
@@ -37,8 +33,7 @@ trait PaginateClause
      * @param int $value
      * @return $this
      */
-    public function offset(int $offset)
-    {
+    public function offset(int $offset) {
         $this->addToSourceArray('OFFSET', "OFFSET $offset");
         return $this;
     }
@@ -50,19 +45,16 @@ trait PaginateClause
      * @return mixed
      */
 
-    public function skip(int $skip)
-    {
+    public function skip(int $skip) {
         return $this->offset($skip);
     }
 
-    public function page(int $value, int $take)
-    {
+    public function page(int $value, int $take) {
         $offset = $value * $take;
         return $this->take($take)->offset($offset)->get();
     }
 
-    public function paginate(int $value, int $take = 15)
-    {
+    public function paginate(int $value, int $take = 15) {
         $this->callFoundRows();
         $data = $this->page($value - 1, $take);
 
@@ -88,5 +80,4 @@ trait PaginateClause
             ]
         ];
     }
-
 }

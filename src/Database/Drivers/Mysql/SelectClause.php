@@ -2,12 +2,10 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-trait SelectClause
-{
+trait SelectClause {
     use ProcessClause;
 
-    public function select(...$args)
-    {
+    public function select(...$args) {
         $this->clearSource('DISTINCT');
 
         if (count($args) == 1 && !is_string($args[0]) && !$args[0] instanceof RawClause) {
@@ -39,9 +37,7 @@ trait SelectClause
         return $this;
     }
 
-    protected function makeSelectQueryString()
-    {
-
+    protected function makeSelectQueryString() {
         $this->addToSourceArray('SELECT', "SELECT" . ($this->callFoundRows ? ' SQL_CALC_FOUND_ROWS' : ''));
         $this->addToSourceArray('FROM', "FROM `$this->table`");
 
@@ -52,8 +48,7 @@ trait SelectClause
         return $this->makeSourceValueString();
     }
 
-    protected function makeSourceValueString()
-    {
+    protected function makeSourceValueString() {
         ksort($this->sourceValue);
 
         $array = [];
@@ -66,8 +61,7 @@ trait SelectClause
         return implode(' ', $array);
     }
 
-    public function selectRaw($query, $values = [])
-    {
+    public function selectRaw($query, $values = []) {
         $raw = new RawClause();
         $raw->setRawData($query, $values);
         $this->select($raw);
@@ -81,8 +75,7 @@ trait SelectClause
      * @param callable $callback
      * @return bool
      */
-    public function chunk($count, callable $callback)
-    {
+    public function chunk($count, callable $callback) {
         $list = $this->get();
 
         do {
@@ -101,8 +94,7 @@ trait SelectClause
      * @return bool
      */
 
-    public function each(callable $callback)
-    {
+    public function each(callable $callback) {
         $list = $this->get();
 
         do {

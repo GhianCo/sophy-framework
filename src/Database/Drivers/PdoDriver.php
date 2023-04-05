@@ -26,8 +26,7 @@ class PdoDriver implements IDBDriver {
      * @return PDO
      */
 
-    public function getConnection()
-    {
+    public function getConnection() {
         return $this->pdo;
     }
 
@@ -48,6 +47,4 @@ class PdoDriver implements IDBDriver {
     public function close() {
         $this->pdo = null;
     }
-
-
 }

@@ -2,24 +2,20 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-class RawClause
-{
+class RawClause {
     protected $params = [];
     protected $query;
 
-    public function setRawData($query, array $values)
-    {
+    public function setRawData($query, array $values) {
         $this->query = $query;
         $this->params = $values;
     }
 
-    public function getRawQuery()
-    {
+    public function getRawQuery() {
         return $this->query;
     }
 
-    public function getRawValues()
-    {
+    public function getRawValues() {
         return $this->params;
     }
 }

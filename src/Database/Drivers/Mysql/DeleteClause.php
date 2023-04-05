@@ -2,12 +2,10 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-trait DeleteClause
-{
+trait DeleteClause {
     use ProcessClause;
 
-    public function deleteRow()
-    {
+    public function deleteRow() {
         $this->setAction('delete');
         $this->clearSource('SELECT');
         $this->clearSource('DISTINCT');
@@ -16,9 +14,7 @@ trait DeleteClause
         return $this->execute($query, $this->params);
     }
 
-    public function truncate()
-    {
+    public function truncate() {
         return $this->execute("TRUNCATE `$this->table`");
     }
-
 }

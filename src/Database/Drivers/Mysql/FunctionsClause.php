@@ -2,9 +2,7 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-trait FunctionsClause
-{
-
+trait FunctionsClause {
     use SelectClause;
 
     /**
@@ -14,8 +12,7 @@ trait FunctionsClause
      * @return int
      */
 
-    public function count($column = '*')
-    {
+    public function count($column = '*') {
         $this->select(function ($query) use ($column) {
             $query->count($column)->as('count');
         });
@@ -28,8 +25,7 @@ trait FunctionsClause
      * @param  string  $columns
      * @return int
      */
-    public function sum($column = '*')
-    {
+    public function sum($column = '*') {
         $this->select(function ($query) use ($column) {
             $query->sum($column)->as('sum');
         });
@@ -43,8 +39,7 @@ trait FunctionsClause
      * @param  string  $column
      * @return mixed
      */
-    public function avg($column = '*')
-    {
+    public function avg($column = '*') {
         $this->select(function ($query) use ($column) {
             $query->avg($column)->as('avg');
         });
@@ -58,8 +53,7 @@ trait FunctionsClause
      * @param  string  $column
      * @return mixed
      */
-    public function min($column = '*')
-    {
+    public function min($column = '*') {
         $this->select(function ($query) use ($column) {
             $query->min($column)->as('min');
         });
@@ -73,8 +67,7 @@ trait FunctionsClause
      * @param  string  $column
      * @return mixed
      */
-    public function max($column = '*')
-    {
+    public function max($column = '*') {
         $this->select(function ($query) use ($column) {
             $query->max($column)->as('max');
         });
@@ -88,11 +81,7 @@ trait FunctionsClause
      * @param  string  $column
      * @return mixed
      */
-    public function value($column = '*')
-    {
+    public function value($column = '*') {
         return $this->get_value($this->first(), $column);
     }
-
-
-
 }

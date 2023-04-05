@@ -2,13 +2,10 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-trait GroupByClause
-{
-
+trait GroupByClause {
     use ProcessClause;
 
-    public function groupBy(...$groups)
-    {
+    public function groupBy(...$groups) {
         $arr = [];
         foreach ($groups as $group) {
             $arr[] = $this->fix_column_name($group)['name'];

@@ -16,8 +16,7 @@ use Sophy\Domain\BaseEntity;
 use Sophy\Domain\BaseRepository;
 use Sophy\Domain\Exceptions\ConexionDBException;
 
-abstract class BaseRepositoryMysql implements BaseRepository
-{
+abstract class BaseRepositoryMysql implements BaseRepository {
     use SelectClause;
     use WhereClause;
     use GroupByClause;
@@ -45,8 +44,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
     private $table;
     private $nameSpaceEntity = 'App\\%s\\Domain\\Entities\\%s';
 
-    public function __construct(IDBDriver $driver)
-    {
+    public function __construct(IDBDriver $driver) {
         $this->driver = $driver;
     }
 
@@ -54,8 +52,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
      * @param string $table
      * @return void
      */
-    public function setTable(string $table)
-    {
+    public function setTable(string $table) {
         $this->table = $table;
         $this->primaryKey = $this->table . '_id';
     }
@@ -63,29 +60,24 @@ abstract class BaseRepositoryMysql implements BaseRepository
     /**
      * @return string
      */
-    public function getTable()
-    {
+    public function getTable() {
         return $this->table;
     }
 
-    public function setAction($action)
-    {
+    public function setAction($action) {
         $this->action = $action;
         return $this;
     }
 
-    public function getAction()
-    {
+    public function getAction() {
         return $this->action;
     }
 
-    public function callFoundRows()
-    {
+    public function callFoundRows() {
         return $this->callFoundRows = true;
     }
 
-    public function save(BaseEntity $entity): BaseEntity
-    {
+    public function save(BaseEntity $entity): BaseEntity {
         try {
             if (isset($entity->{$this->primaryKey})) {
                 $this->where($this->primaryKey, $entity->{$this->primaryKey})->update($entity);
@@ -99,8 +91,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
     }
 
-    public function delete(BaseEntity $entity)
-    {
+    public function delete(BaseEntity $entity) {
         try {
             return $this->deleteRow($entity);
         } catch (\Exception $exception) {
@@ -108,8 +99,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
     }
 
-    public function first($columns = [])
-    {
+    public function first($columns = []) {
         $db = $this->limit(1);
 
         if (count($columns)) {
@@ -124,8 +114,7 @@ abstract class BaseRepositoryMysql implements BaseRepository
      *
      * @return bool
      */
-    public function exists()
-    {
+    public function exists() {
         $result = $this->first();
         return $result ? true : false;
     }
@@ -135,13 +124,11 @@ abstract class BaseRepositoryMysql implements BaseRepository
      *
      * @return bool
      */
-    public function doesntExist()
-    {
+    public function doesntExist() {
         return !$this->exists();
     }
 
-    protected function execute($query, $params = [], $return = false, $isList = true)
-    {
+    protected function execute($query, $params = [], $return = false, $isList = true) {
         $this->params = $params;
 
         if ($this->params == null) {
@@ -151,7 +138,6 @@ abstract class BaseRepositoryMysql implements BaseRepository
         }
 
         if ($return) {
-
             $table = ucfirst($this->getTable());
 
             if ($isList == true) {
@@ -160,7 +146,6 @@ abstract class BaseRepositoryMysql implements BaseRepository
             } else {
                 $result = $stmt->fetchObject(sprintf($this->nameSpaceEntity, $table, $table));
             }
-
         } else {
             $result = $stmt->rowCount();
         }
@@ -168,16 +153,13 @@ abstract class BaseRepositoryMysql implements BaseRepository
         return $result;
     }
 
-    public function get()
-    {
+    public function get() {
         $query = $this->makeSelectQueryString();
         return $this->execute($query, $this->params, true);
     }
 
-    public function getOne()
-    {
+    public function getOne() {
         $query = $this->makeSelectQueryString();
         return $this->execute($query, $this->params, true, false);
     }
-
 }

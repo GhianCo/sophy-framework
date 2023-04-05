@@ -5,9 +5,7 @@ namespace Sophy\Validation;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class Validator extends \Valitron\Validator
-{
-
+class Validator extends \Valitron\Validator {
     /**
      * The 'errors' attribute name.
      *
@@ -27,8 +25,7 @@ class Validator extends \Valitron\Validator
      *
      * @param ServerRequestInterface $request PSR7 request
      */
-    public function __construct($request)
-    {
+    public function __construct($request) {
         $params = $request->getParams();
         $routeInfo = isset($request->getAttribute('routeInfo')[2]) ? $request->getAttribute('routeInfo')[2] : [];
         $params = array_merge((array)$routeInfo, $params);
@@ -44,16 +41,14 @@ class Validator extends \Valitron\Validator
      * @return \Psr\Http\Message\ResponseInterface
      */
 
-    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler)
-    {
+    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler) {
         $this->validate();
         $request = $request->withAttribute($this->errors_name, $this->errors());
         $request = $request->withAttribute($this->has_errors_name, $this->hasErrors());
         return $handler->handle($request);
     }
 
-    public function hasErrors()
-    {
+    public function hasErrors() {
         return !empty($this->errors());
     }
 }

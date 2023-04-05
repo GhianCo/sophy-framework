@@ -15,8 +15,7 @@ use Sophy\Database\Drivers\IDBDriver;
 use Slim\Factory\AppFactory;
 use Slim\App as Router;
 
-class App
-{
+class App {
     public static string $root;
 
     public static Container $container;
@@ -27,8 +26,7 @@ class App
 
     public Router $router;
 
-    public static function bootstrap(string $root): self
-    {
+    public static function bootstrap(string $root): self {
         self::$root = $root;
 
         $containerBuilder = new ContainerBuilder();
@@ -47,16 +45,14 @@ class App
             ->runServiceProviders('runtime');
     }
 
-    protected function loadConfig(): self
-    {
+    protected function loadConfig(): self {
         Dotenv::createImmutable(self::$root)->load();
         Config::load(self::$root . "/config");
 
         return $this;
     }
 
-    protected function runServiceProviders(string $type): self
-    {
+    protected function runServiceProviders(string $type): self {
         foreach (config("providers.$type", []) as $provider) {
             (new $provider())->registerServices();
         }
@@ -64,8 +60,7 @@ class App
         return $this;
     }
 
-    protected function setHttpHandlers(): self
-    {
+    protected function setHttpHandlers(): self {
         $this->router = singleton(Router::class, function () {
             AppFactory::setContainer(self::$container);
             $router = AppFactory::create();
@@ -81,8 +76,7 @@ class App
         return $this;
     }
 
-    protected function cors()
-    {
+    protected function cors() {
         if (isset($_SERVER['HTTP_ORIGIN'])) {
             header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
             header('Access-Control-Allow-Credentials: true');
@@ -90,17 +84,18 @@ class App
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
                 header('Access-Control-Allow-Methods: PUT, GET, POST, OPTIONS, DELETE');
-            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+            }
+            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
                 header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+            }
             exit(0);
         }
         return $this;
     }
 
-    protected function setUpDatabaseConnection(): self
-    {
+    protected function setUpDatabaseConnection(): self {
         $this->database = app(IDBDriver::class);
 
         $this->database->connect(
@@ -110,13 +105,12 @@ class App
             config("database.name"),
             config("database.username"),
             config("database.password"),
-            );
+        );
 
         return $this;
     }
 
-    public function run()
-    {
+    public function run() {
         $env = config('app.env');
 
         date_default_timezone_set(config('app.timezone', 'UTC'));

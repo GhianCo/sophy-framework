@@ -2,42 +2,35 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-trait ProcessClause
-{
+trait ProcessClause {
     private $param_index = 0;
 
-    public function getSourceValueItem($struct_name)
-    {
+    public function getSourceValueItem($struct_name) {
         $s_index = $this->sql_stractur($struct_name);
         return $this->sourceValue[$s_index] ?? [];
     }
 
-    protected function addToSourceArray($struct_name, $value)
-    {
+    protected function addToSourceArray($struct_name, $value) {
         $s_index = $this->sql_stractur($struct_name);
         $this->sourceValue[$s_index][] = $value;
     }
 
-    protected function clearSource($struct_name)
-    {
+    protected function clearSource($struct_name) {
         $s_index = $this->sql_stractur($struct_name);
         $this->sourceValue[$s_index] = [];
     }
-    protected function clearSourceValue()
-    {
+    protected function clearSourceValue() {
         $this->sourceValue = [];
     }
 
-    protected function method_in_maker(array $list, $callback)
-    {
+    protected function method_in_maker(array $list, $callback) {
         foreach ($list as $item) {
             $param_name = $this->add_to_param_auto_name($item);
             $callback($param_name);
         }
     }
 
-    private function queryMakerJoin($type, $args)
-    {
+    private function queryMakerJoin($type, $args) {
         $join_table = $args[0];
         $join_table_column = $args[1];
         $operator = $args[2] ?? false;
@@ -54,7 +47,7 @@ trait ProcessClause
             $operator = '=';
 
             $main_column = $table_main['name'];
-        } else if ($operator && !$main_column) {
+        } elseif ($operator && !$main_column) {
             $table_second = $this->fix_column_name($join_table);
             $table_main = $this->fix_column_name($operator);
 
@@ -64,7 +57,7 @@ trait ProcessClause
             $join_table_column = $table_second['name'];
 
             $main_column = $table_main['name'];
-        } else if ($main_column) {
+        } elseif ($main_column) {
             $join_table = "`$join_table`";
 
             $join_table_column = $this->fix_column_name($join_table_column)['name'];
@@ -74,9 +67,7 @@ trait ProcessClause
         return "$type JOIN $join_table ON $join_table_column $operator $main_column";
     }
 
-    protected function add_to_param($name, $value)
-    {
-
+    protected function add_to_param($name, $value) {
         if ($value === false) {
             $value = 0;
         } elseif ($value === true) {
@@ -87,20 +78,17 @@ trait ProcessClause
         return ":$name";
     }
 
-    protected function add_to_param_auto_name($value)
-    {
+    protected function add_to_param_auto_name($value) {
         $name = $this->get_new_param_name();
         return $this->add_to_param($name, $value);
     }
 
-    protected function get_new_param_name()
-    {
+    protected function get_new_param_name() {
         $this->param_index++;
         return 'p' . $this->param_index;
     }
 
-    protected function fix_column_name($name)
-    {
+    protected function fix_column_name($name) {
         $array = explode('.', $name);
         $count = count($array);
 
@@ -112,7 +100,7 @@ trait ProcessClause
             $table = $this->table;
             $column = $array[0];
             $type = 'column';
-        } else if ($count == 2) {
+        } elseif ($count == 2) {
             $table = $array[0];
             $column = $array[1];
             $type = 'table_and_column';
@@ -127,20 +115,17 @@ trait ProcessClause
         return ['name' => "$table.$column", 'table' => $table, 'column' => $column, 'type' => $type];
     }
 
-    protected function fix_operator_and_value(&$operator, &$value)
-    {
+    protected function fix_operator_and_value(&$operator, &$value) {
         if ($value == false || $value == null) {
             $value = $operator;
             $operator = '=';
         }
     }
 
-    protected function raw_maker($query, $values)
-    {
+    protected function raw_maker($query, $values) {
         $index = 0;
 
         do {
-
             $find = strpos($query, '?');
 
             if ($find === false) {
@@ -155,23 +140,19 @@ trait ProcessClause
         return $query;
     }
 
-    public function get_value($param, $name)
-    {
+    public function get_value($param, $name) {
         return $param->{$name};
     }
 
-    public function get_params()
-    {
+    public function get_params() {
         return $this->params;
     }
 
-    public function get_sourceValue()
-    {
+    public function get_sourceValue() {
         return $this->sourceValue;
     }
 
-    protected function makeInsertQueryString($values)
-    {
+    protected function makeInsertQueryString($values) {
         $param_name = [];
         $param_value_name_list = [];
 
@@ -183,8 +164,7 @@ trait ProcessClause
         return "INSERT INTO `$this->table` (" . implode(',', $param_name) . ") VALUES (" . implode(',', $param_value_name_list) . ")";
     }
 
-    protected function makeUpdateQueryString($values)
-    {
+    protected function makeUpdateQueryString($values) {
         $params = [];
         foreach ($values as $name => $value) {
             $params[] = $this->fix_column_name($name)['name'] . ' = ' . $this->add_to_param_auto_name($value);
@@ -195,9 +175,7 @@ trait ProcessClause
         return "UPDATE `$this->table` SET " . implode(',', $params) . " $extra";
     }
 
-    protected function makeUpdateQueryIncrement(string $column, $value = 1, $action = '+')
-    {
-
+    protected function makeUpdateQueryIncrement(string $column, $value = 1, $action = '+') {
         $values = [];
 
         $column = $this->fix_column_name($column)['name'];
@@ -214,14 +192,12 @@ trait ProcessClause
         return "UPDATE `$this->table` SET " . implode(',', $params) . " $extra";
     }
 
-    protected function makeDeleteQueryString()
-    {
+    protected function makeDeleteQueryString() {
         $extra = $this->makeSourceValueString();
         return "DELETE FROM `$this->table` $extra";
     }
 
-    protected function sql_stractur($key = null)
-    {
+    protected function sql_stractur($key = null) {
         $arr = [
             'SELECT' => 1,
             'FIELDS' => 2,

@@ -3,7 +3,6 @@
 namespace Sophy\Database\Drivers;
 
 interface IDBDriver {
-
     public function connect(
         string $protocol,
         string $host,
@@ -22,5 +21,4 @@ interface IDBDriver {
     public function lastInsertId();
 
     public function close();
-
 }

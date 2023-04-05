@@ -2,9 +2,7 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
-trait OrderByClause
-{
-
+trait OrderByClause {
     use ProcessClause;
 
     /**
@@ -14,8 +12,7 @@ trait OrderByClause
      * @param string $direction
      * @return $this
      */
-    public function orderBy($column, $direction = 'asc')
-    {
+    public function orderBy($column, $direction = 'asc') {
         $column = $this->fix_column_name($column)['name'];
         $this->addToSourceArray('ORDER_BY', "ORDER BY $column $direction");
         return $this;
@@ -29,31 +26,26 @@ trait OrderByClause
      * @param string $direction
      * @return $this
      */
-    public function orderByCount($column, $direction = 'asc')
-    {
+    public function orderByCount($column, $direction = 'asc') {
         $column = $this->fix_column_name($column)['name'];
         $this->addToSourceArray('ORDER_BY', "ORDER BY COUNT($column) $direction");
         return $this;
     }
 
 
-    public function inRandomOrder()
-    {
+    public function inRandomOrder() {
         $this->addToSourceArray('ORDER_BY', "ORDER BY RAND()");
         return $this;
     }
 
 
-    public function latest($column = 'created_at')
-    {
+    public function latest($column = 'created_at') {
         $this->orderBy($column, 'DESC');
         return $this;
     }
 
-    public function oldest($column = 'created_at')
-    {
+    public function oldest($column = 'created_at') {
         $this->orderBy($column, 'ASC');
         return $this;
     }
-
 }
