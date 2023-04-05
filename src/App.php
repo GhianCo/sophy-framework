@@ -19,11 +19,13 @@ class App
 {
     public static string $root;
 
+    public static Container $container;
+
+    private static $env = 'dev';
+
     public Router $router;
 
     public Request $request;
-
-    public static Container $container;
 
     public IDBDriver $database;
 
@@ -31,7 +33,14 @@ class App
     {
         self::$root = $root;
 
+        self::$env = config('app.env');
+
         $containerBuilder = new ContainerBuilder();
+
+        if (self::$env == 'prod') {
+            $containerBuilder->enableCompilation($root . '/var/cache');
+        }
+
         $containerBuilder->useAutowiring(true);
 
         self::$container = $containerBuilder->build();
@@ -119,13 +128,11 @@ class App
 
     public function run()
     {
-        $env = config('app.env');
-
         // Create Error Handler
         $errorHandler = new HttpErrorHandler($this->router->getCallableResolver(), $this->router->getResponseFactory());
 
         // Create Shutdown Handler
-        register_shutdown_function(new ShutdownHandler($this->request, $errorHandler, $env == 'dev'));
+        register_shutdown_function(new ShutdownHandler($this->request, $errorHandler, self::$env == 'dev'));
 
         // Add Routing Middleware
         $this->router->addRoutingMiddleware();
@@ -134,7 +141,7 @@ class App
         $this->router->addBodyParsingMiddleware();
 
         // Add Error Middleware
-        $errorMiddleware = $this->router->addErrorMiddleware($env == 'dev', false, false);
+        $errorMiddleware = $this->router->addErrorMiddleware(self::$env == 'dev', false, false);
         $errorMiddleware->setDefaultErrorHandler($errorHandler);
 
         // Run App & Emit Response
