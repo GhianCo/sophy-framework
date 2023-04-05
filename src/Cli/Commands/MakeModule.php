@@ -76,7 +76,6 @@ class MakeModule extends Command {
 
         recursiveCopy($source, $target);
 
-        replaceFileContent($target . '/Base.php', $name);
         replaceFileContent($target . '/Create.php', $name);
         replaceFileContent($target . '/CreateValidator.php', $name);
         replaceFileContent($target . '/GetAll.php', $name);

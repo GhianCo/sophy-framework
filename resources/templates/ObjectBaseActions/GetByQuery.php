@@ -2,11 +2,20 @@
 
 namespace App\Objectbase\Application\Actions;
 
+use App\Objectbase\Application\Services\FindService;
 use Psr\Http\Message\ResponseInterface as Response;
+use Sophy\Application\Actions\Action;
 use Sophy\Constants;
 
-class GetByQuery extends Base
+class GetByQuery extends Action
 {
+    private $findService;
+
+    public function __construct(FindService $findService)
+    {
+        $this->findService = $findService;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -15,7 +24,7 @@ class GetByQuery extends Base
         $queryParams = $this->request->getQueryParams();
         $querySearch = isset($queryParams['q']) ? $queryParams['q'] : Constants::UNDEFINED;
 
-        $objectbase = $this->getFindService()->getBySearch($querySearch);
+        $objectbase = $this->findService->getBySearch($querySearch);
 
         return $this->respondWithData($objectbase, 'Lista de objectbasees por query');
     }

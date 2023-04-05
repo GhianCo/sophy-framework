@@ -2,10 +2,19 @@
 
 namespace App\Objectbase\Application\Actions;
 
+use App\Objectbase\Application\Services\FindService;
 use Psr\Http\Message\ResponseInterface as Response;
+use Sophy\Application\Actions\Action;
 
-class GetAll extends Base
+class GetAll extends Action
 {
+    private $findService;
+
+    public function __construct(FindService $findService)
+    {
+        $this->findService = $findService;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -15,7 +24,7 @@ class GetAll extends Base
         $page = isset($queryParams['page']) ? $queryParams['page'] : null;
         $perPage = isset($queryParams['perPage']) ? $queryParams['perPage'] : null;
 
-        $objectbase = $this->getFindService()->getObjectbaseesByPage((int)$page, (int)$perPage);
+        $objectbase = $this->findService->getObjectbaseesByPage((int)$page, (int)$perPage);
 
         return $this->respondWithData($objectbase['data'], 'Lista de objectbasees', $objectbase['pagination']);
     }
