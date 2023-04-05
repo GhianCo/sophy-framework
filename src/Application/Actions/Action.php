@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
+use Sophy\Domain\Exceptions\SophyException;
 
 abstract class Action {
     protected Request $request;
@@ -30,7 +31,7 @@ abstract class Action {
             }
 
             return $this->action();
-        } catch (HttpNotFoundException $e) {
+        } catch (HttpNotFoundException | SophyException $e) {
             throw new HttpNotFoundException($this->request, $e->getMessage());
         }
     }

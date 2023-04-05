@@ -13,16 +13,13 @@ use Slim\Exception\HttpNotFoundException;
 use Slim\Exception\HttpNotImplementedException;
 use Slim\Exception\HttpUnauthorizedException;
 use Slim\Handlers\ErrorHandler as SlimErrorHandler;
-use Sophy\Domain\Exceptions\SophyException;
 use Throwable;
 
-class HttpErrorHandler extends SlimErrorHandler
-{
+class HttpErrorHandler extends SlimErrorHandler {
     /**
      * @inheritdoc
      */
-    protected function respond(): Response
-    {
+    protected function respond(): Response {
         $exception = $this->exception;
         $statusCode = 500;
         $error = new ActionError(
@@ -45,27 +42,6 @@ class HttpErrorHandler extends SlimErrorHandler
             } elseif ($exception instanceof HttpBadRequestException) {
                 $error->setType(ActionError::BAD_REQUEST);
             } elseif ($exception instanceof HttpNotImplementedException) {
-                $error->setType(ActionError::NOT_IMPLEMENTED);
-            }
-        }
-
-        if ($exception instanceof SophyException) {
-            $statusCode = $exception->getCode();
-            $error->setDescription($exception->getMessage());
-
-            if ($statusCode == 404) {
-                $error->setType(ActionError::RESOURCE_NOT_FOUND);
-            } elseif ($statusCode == 405) {
-                $error->setType(ActionError::NOT_ALLOWED);
-            } elseif ($statusCode == 401) {
-                $error->setType(ActionError::UNAUTHENTICATED);
-            } elseif ($statusCode == 403) {
-                $error->setType(ActionError::INSUFFICIENT_PRIVILEGES);
-            } elseif ($statusCode == 400) {
-                $error->setType(ActionError::BAD_REQUEST);
-            } elseif ($statusCode == 422) {
-                $error->setType(ActionError::VERIFICATION_ERROR);
-            } elseif ($statusCode == 501) {
                 $error->setType(ActionError::NOT_IMPLEMENTED);
             }
         }
