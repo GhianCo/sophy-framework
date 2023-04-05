@@ -119,11 +119,6 @@ abstract class BaseRepositoryMysql implements BaseRepository
         return $db->getOne();
     }
 
-    public function find($id, $columns = [])
-    {
-        return $this->where($this->primaryKey, $id)->first($columns);
-    }
-
     /**
      * Determine if any rows exist for the current query.
      *

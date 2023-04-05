@@ -52,7 +52,8 @@ trait SelectClause
         return $this->makeSourceValueString();
     }
 
-    protected function makeSourceValueString(){
+    protected function makeSourceValueString()
+    {
         ksort($this->sourceValue);
 
         $array = [];
@@ -71,5 +72,41 @@ trait SelectClause
         $raw->setRawData($query, $values);
         $this->select($raw);
         return $this;
+    }
+
+    /**
+     * Chunk the results of the query.
+     *
+     * @param int $count
+     * @param callable $callback
+     * @return bool
+     */
+    public function chunk($count, callable $callback)
+    {
+        $list = $this->get();
+
+        do {
+            $return = $callback(array_splice($list, 0, $count));
+            if ($return === false) {
+                break;
+            }
+        } while (count($list));
+    }
+
+    /**
+     * Chunk the results of the query.
+     *
+     * @param int $count
+     * @param callable $callback
+     * @return bool
+     */
+
+    public function each(callable $callback)
+    {
+        $list = $this->get();
+
+        do {
+            $callback(array_splice($list, 0, 1)[0]);
+        } while (count($list));
     }
 }

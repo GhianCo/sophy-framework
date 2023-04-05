@@ -108,6 +108,11 @@ trait WhereClause
         $this->addToSourceArray('WHERE', $query);
     }
 
+    public function find($id, $columns = [])
+    {
+        return $this->where($this->primaryKey, $id)->first($columns);
+    }
+
     public function where(...$args)
     {
         $this->addOperator('AND');
@@ -485,6 +490,5 @@ trait WhereClause
     {
         $this->addToSourceArray('WHERE', ')');
     }
-
 
 }
