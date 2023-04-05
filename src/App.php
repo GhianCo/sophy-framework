@@ -38,8 +38,6 @@ class App
 
         $app = app(self::class);
 
-        date_default_timezone_set(config('app.timezone', 'UTC'));
-
         return $app
             ->loadConfig()
             ->runServiceProviders('boot')
@@ -120,6 +118,8 @@ class App
     public function run()
     {
         $env = config('app.env');
+
+        date_default_timezone_set(config('app.timezone', 'UTC'));
 
         // Create Error Handler
         $errorHandler = new HttpErrorHandler($this->router->getCallableResolver(), $this->router->getResponseFactory());
