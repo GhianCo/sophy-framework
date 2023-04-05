@@ -3,33 +3,32 @@
 namespace Sophy;
 
 use DI\Container;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Sophy\Config\Config;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
-use Slim\Psr7\Request;
 use Sophy\Application\Handlers\HttpErrorHandler;
 use Sophy\Application\Handlers\ShutdownHandler;
 use Sophy\Application\ResponseEmitter\ResponseEmitter;
 use Sophy\Database\Drivers\IDBDriver;
-use Sophy\Server\IServer;
 use Slim\Factory\AppFactory;
 use Slim\App as Router;
 
-class App {
+class App
+{
     public static string $root;
 
     public Router $router;
 
     public Request $request;
 
-    public IServer $server;
-
     public static Container $container;
 
     public IDBDriver $database;
 
-    public static function bootstrap(string $root): self {
+    public static function bootstrap(string $root): self
+    {
         self::$root = $root;
 
         $containerBuilder = new ContainerBuilder();
@@ -50,14 +49,16 @@ class App {
             ->runServiceProviders('runtime');
     }
 
-    protected function loadConfig(): self {
+    protected function loadConfig(): self
+    {
         Dotenv::createImmutable(self::$root)->load();
         Config::load(self::$root . "/config");
 
         return $this;
     }
 
-    protected function runServiceProviders(string $type): self {
+    protected function runServiceProviders(string $type): self
+    {
         foreach (config("providers.$type", []) as $provider) {
             (new $provider())->registerServices();
         }
@@ -65,22 +66,25 @@ class App {
         return $this;
     }
 
-    protected function setHttpHandlers(): self {
+    protected function setHttpHandlers(): self
+    {
         $this->router = singleton(Router::class, function () {
             AppFactory::setContainer(self::$container);
             $router = AppFactory::create();
             $router->setBasePath(config("app.pathRoute"));
             return $router;
         });
-        $this->server = app(IServer::class);
+
         $this->request = singleton(Request::class, function () {
-            return $this->server->getRequest();
+            $serverRequestCreator = ServerRequestCreatorFactory::create();
+            return $serverRequestCreator->createServerRequestFromGlobals();
         });
 
         return $this;
     }
 
-    protected function cors() {
+    protected function cors()
+    {
         if (isset($_SERVER['HTTP_ORIGIN'])) {
             header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
             header('Access-Control-Allow-Credentials: true');
@@ -97,7 +101,8 @@ class App {
         return $this;
     }
 
-    protected function setUpDatabaseConnection(): self {
+    protected function setUpDatabaseConnection(): self
+    {
         $this->database = app(IDBDriver::class);
 
         $this->database->connect(
@@ -107,27 +112,20 @@ class App {
             config("database.name"),
             config("database.username"),
             config("database.password"),
-        );
+            );
 
         return $this;
     }
 
-    public function run() {
+    public function run()
+    {
         $env = config('app.env');
 
-        $callableResolver = $this->router->getCallableResolver();
-
-        // Create Request object from globals
-        $serverRequestCreator = ServerRequestCreatorFactory::create();
-        $request = $serverRequestCreator->createServerRequestFromGlobals();
-
         // Create Error Handler
-        $responseFactory = $this->router->getResponseFactory();
-        $errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
+        $errorHandler = new HttpErrorHandler($this->router->getCallableResolver(), $this->router->getResponseFactory());
 
         // Create Shutdown Handler
-        $shutdownHandler = new ShutdownHandler($request, $errorHandler, $env == 'dev');
-        register_shutdown_function($shutdownHandler);
+        register_shutdown_function(new ShutdownHandler($this->request, $errorHandler, $env == 'dev'));
 
         // Add Routing Middleware
         $this->router->addRoutingMiddleware();
@@ -140,10 +138,8 @@ class App {
         $errorMiddleware->setDefaultErrorHandler($errorHandler);
 
         // Run App & Emit Response
-        $response = $this->router->handle($request);
         $responseEmitter = new ResponseEmitter();
-        $responseEmitter->emit($response);
-
+        $responseEmitter->emit($this->router->handle($this->request));
         $this->database->close();
     }
 }

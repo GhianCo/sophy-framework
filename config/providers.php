@@ -2,7 +2,6 @@
 
 return [
     'boot' => [
-        Sophy\Providers\ServerServiceProvider::class,
         Sophy\Providers\DatabaseDriverServiceProvider::class,
     ],
     'runtime' => [
