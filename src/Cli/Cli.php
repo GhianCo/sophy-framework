@@ -26,13 +26,15 @@ class Cli {
             (new $provider())->registerServices();
         }
 
+        $defaultConnection = config("database.default");
+
         app(IDBDriver::class)->connect(
-            config("database.driver"),
-            config("database.host"),
-            config("database.port"),
-            config("database.name"),
-            config("database.username"),
-            config("database.password"),
+            config("database.connections." . $defaultConnection . ".driver"),
+            config("database.connections." . $defaultConnection . ".host"),
+            config("database.connections." . $defaultConnection . ".port"),
+            config("database.connections." . $defaultConnection . ".name"),
+            config("database.connections." . $defaultConnection . ".username"),
+            config("database.connections." . $defaultConnection . ".password"),
         );
         /*
         singleton(
