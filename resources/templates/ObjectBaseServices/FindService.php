@@ -2,7 +2,7 @@
 
 namespace App\Objectbase\Application\Services;
 
-use Sophy\Constants;
+use Sophy\Helpers\Constants;
 use App\Objectbase\Application\DTO\ObjectbaseDTO;
 
 final class FindService extends Base
@@ -35,7 +35,7 @@ final class FindService extends Base
 
     public function getBySearch($querySearch)
     {
-        if ($querySearch != Constants::UNDEFINED) {
+        if ($querySearch != Constants::PARAM_UNDEFINED) {
         }
 
         return $this->objectbaseRepository->get()['data'];
@@ -49,9 +49,9 @@ final class FindService extends Base
         $page = $requestBody->page;
         $perPage = $requestBody->perPage;
 
-        if ($query != Constants::UNDEFINED) {}
+        if ($query != Constants::PARAM_UNDEFINED) {}
 
-        if ($active != Constants::UNDEFINED) {}
+        if ($active != Constants::PARAM_UNDEFINED) {}
 
         $providers = $this->objectbaseRepository->get();
 
@@ -63,11 +63,11 @@ final class FindService extends Base
         $requestBody = json_decode((string)json_encode($input), false);
 
         if (!isset($requestBody->query)) {
-            $requestBody->query = Constants::UNDEFINED;
+            $requestBody->query = Constants::PARAM_UNDEFINED;
         }
 
         if (!isset($requestBody->active)) {
-            $requestBody->active = Constants::UNDEFINED;
+            $requestBody->active = Constants::PARAM_UNDEFINED;
         }
 
         if (!isset($requestBody->page)) {

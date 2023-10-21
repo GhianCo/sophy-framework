@@ -5,7 +5,7 @@ namespace App\Objectbase\Application\Actions;
 use App\Objectbase\Application\Services\FindService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Sophy\Application\Actions\Action;
-use Sophy\Constants;
+use Sophy\Helpers\Constants;
 
 class GetByQuery extends Action
 {
@@ -22,7 +22,7 @@ class GetByQuery extends Action
     protected function action(): Response
     {
         $queryParams = $this->request->getQueryParams();
-        $querySearch = isset($queryParams['q']) ? $queryParams['q'] : Constants::UNDEFINED;
+        $querySearch = isset($queryParams['q']) ? $queryParams['q'] : Constants::PARAM_UNDEFINED;
 
         $objectbase = $this->findService->getBySearch($querySearch);
 
