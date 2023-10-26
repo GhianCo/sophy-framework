@@ -58,3 +58,28 @@ function stringInFileFound($path, $valueFind) {
 
     return $valid;
 }
+
+function replaceInFile($path, $string, $replace)
+{
+    set_time_limit(0);
+
+    if (is_file($path) === true)
+    {
+        $file = fopen($path, 'r');
+        $temp = tempnam('./', 'tmp');
+
+        if (is_resource($file) === true)
+        {
+            while (feof($file) === false)
+            {
+                file_put_contents($temp, str_replace($string, $replace, fgets($file)), FILE_APPEND);
+            }
+
+            fclose($file);
+        }
+
+        unlink($path);
+    }
+
+    return rename($temp, $path);
+}
