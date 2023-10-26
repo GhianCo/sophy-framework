@@ -5,8 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Sophy\\": "src/",
-            "App\\": "app/"
+            "Sophy\\": "src/Sophy"
         },
         "files": [
             "src/Helpers/app.php",
