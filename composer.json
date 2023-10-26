@@ -8,8 +8,8 @@
             "Sophy\\": "src/Sophy"
         },
         "files": [
-            "src/Helpers/app.php",
-            "src/Helpers/dir_files.php"
+            "src/Sophy/Helpers/app.php",
+            "src/Sophy/Helpers/dir_files.php"
         ]
     },
     "scripts": {
