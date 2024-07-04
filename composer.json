@@ -9,7 +9,8 @@
         },
         "files": [
             "src/Sophy/Helpers/app.php",
-            "src/Sophy/Helpers/dir_files.php"
+            "src/Sophy/Helpers/dir_files.php",
+            "src/Sophy/Helpers/string.php"
         ]
     },
     "scripts": {
