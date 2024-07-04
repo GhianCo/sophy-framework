@@ -24,6 +24,10 @@ function resourcesDirectory(): string {
     return App::$root . "/resources";
 }
 
+function routesDirectory(): string {
+    return App::$root . "/routes";
+}
+
 function isDev() {
     return $_SERVER['HTTP_HOST'] == 'localhost';
 }

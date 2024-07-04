@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpNotFoundException;
-use Sophy\Domain\Exceptions\SophyException;
+use Sophy\Exceptions\SophyException;
 
 abstract class Action {
     protected Request $request;

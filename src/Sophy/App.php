@@ -3,17 +3,18 @@
 namespace Sophy;
 
 use DI\Container;
+use Sophy\Database\Drivers\IDBDriver;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Factory\ServerRequestCreatorFactory;
-use Sophy\Config\Config;
+use Slim\App as Router;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
+use Sophy\Config\Config;
+use Slim\Factory\AppFactory;
+use Slim\Factory\ServerRequestCreatorFactory;
 use Sophy\Application\Handlers\HttpErrorHandler;
 use Sophy\Application\Handlers\ShutdownHandler;
 use Sophy\Application\ResponseEmitter\ResponseEmitter;
-use Sophy\Database\Drivers\IDBDriver;
-use Slim\Factory\AppFactory;
-use Slim\App as Router;
+use Sophy\Domain\EntityBase;
 
 class App
 {
@@ -24,7 +25,7 @@ class App
     public IDBDriver $database;
 
     public Request $request;
-
+    
     public Router $router;
 
     public static function bootstrap(string $root): self
@@ -42,7 +43,6 @@ class App
             ->loadConfig()
             ->runServiceProviders('boot')
             ->setHttpHandlers()
-            ->cors()
             ->setUpDatabaseConnection()
             ->runServiceProviders('runtime');
     }
@@ -69,7 +69,7 @@ class App
         $this->router = singleton(Router::class, function () {
             AppFactory::setContainer(self::$container);
             $router = AppFactory::create();
-            $router->setBasePath(config("app.pathRoute"));
+            $router->setBasePath('/' . config("app.path_route"));
             return $router;
         });
 
@@ -78,26 +78,6 @@ class App
             return $serverRequestCreator->createServerRequestFromGlobals();
         });
 
-        return $this;
-    }
-
-    protected function cors()
-    {
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-            header('Access-Control-Allow-Credentials: true');
-            header('Access-Control-Max-Age: 86400');
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
-                header('Access-Control-Allow-Methods: PUT, GET, POST, OPTIONS, DELETE');
-            }
-            if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
-                header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
-            }
-            exit(0);
-        }
         return $this;
     }
 
@@ -115,6 +95,8 @@ class App
             config("database.connections." . $defaultConnection . ".username"),
             config("database.connections." . $defaultConnection . ".password"),
             );
+
+        EntityBase::setDatabaseDriver($this->database);
 
         return $this;
     }

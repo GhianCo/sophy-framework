@@ -167,6 +167,7 @@ trait ProcessClause {
     protected function makeUpdateQueryString($values) {
         $params = [];
         foreach ($values as $name => $value) {
+            if ($name == $this->primaryKey) continue;
             $params[] = $this->fix_column_name($name)['name'] . ' = ' . $this->add_to_param_auto_name($value);
         }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Sophy\Infrastructure;
+namespace Sophy\Domain;
 
 use Sophy\Database\Drivers\IDBDriver;
 use Sophy\Database\Drivers\Mysql\DeleteClause;
@@ -12,11 +12,10 @@ use Sophy\Database\Drivers\Mysql\PaginateClause;
 use Sophy\Database\Drivers\Mysql\SelectClause;
 use Sophy\Database\Drivers\Mysql\UpdateClause;
 use Sophy\Database\Drivers\Mysql\WhereClause;
-use Sophy\Domain\BaseEntity;
-use Sophy\Domain\BaseRepository;
-use Sophy\Domain\Exceptions\ConexionDBException;
+use Sophy\Domain\IEntityBase;
+use Sophy\Exceptions\ConexionDBException;
 
-abstract class BaseRepositoryMysql implements BaseRepository {
+abstract class EntityBase implements IEntityBase {
     use SelectClause;
     use WhereClause;
     use GroupByClause;
@@ -31,21 +30,61 @@ abstract class BaseRepositoryMysql implements BaseRepository {
 
     use DeleteClause;
 
-    public IDBDriver $driver;
+    private static ?IDBDriver $driver = null;
 
-    protected $config;
-    protected $params = [];
-    protected $action = 'select';
-    protected $callFoundRows = false;
-    protected $sourceValue = [];
+    private $config;
+    private $params = [];
+    private $action = 'select';
+    private $callFoundRows = false;
+    private $sourceValue = [];
 
     protected $primaryKey = 'id';
 
-    private $table;
-    private $nameSpaceEntity = 'App\\%s\\Domain\\Entities\\%s';
+    protected array $fillable = [];
+    protected array $attributes = [];
 
-    public function __construct(IDBDriver $driver) {
-        $this->driver = $driver;
+    private $table;
+    private $nameSpaceModel = 'App\\Model\\%s';
+
+    public function __construct() {
+        if (is_null($this->table)) {
+            $subclass = new \ReflectionClass(static::class);
+            $this->table = snake_case("{$subclass->getShortName()}");
+        }
+    }
+
+    public static function create(array $attributes) {
+        return (new static())->massAsign($attributes);
+    }
+
+    public static function update(array $attributes, int $id) {
+        return (new static())->massAsign($attributes, $id);
+    }
+
+    public static function table() {
+        return new static();
+    }
+
+    protected function massAsign(array $attributes, $id = null) {
+        if (count($this->fillable) == 0) {
+            throw new \Error("Entidad " . static::class . " no tiene atributos por asignar");
+        }
+
+        if (isset($id)) {
+            $this->attributes[$this->primaryKey] = $id;
+        }
+
+        foreach ($attributes as $key => $value) {
+            if (in_array($key, $this->fillable)) {
+                $this->attributes[$key] = $value;
+            }
+        }
+
+        return $this;
+    }
+
+    public static function setDatabaseDriver(IDBDriver $driver) {
+        self::$driver = $driver;
     }
 
     /**
@@ -54,7 +93,6 @@ abstract class BaseRepositoryMysql implements BaseRepository {
      */
     public function setTable(string $table) {
         $this->table = $table;
-        $this->primaryKey = $this->table . '_id';
     }
 
     /**
@@ -77,25 +115,26 @@ abstract class BaseRepositoryMysql implements BaseRepository {
         return $this->callFoundRows = true;
     }
 
-    public function save(BaseEntity $entity): BaseEntity {
+    public function save() {
         try {
-            if (isset($entity->{$this->primaryKey})) {
-                $this->where($this->primaryKey, $entity->{$this->primaryKey})->update($entity);
+            if (isset($this->attributes[$this->primaryKey])) {
+                $id = $this->attributes[$this->primaryKey];
+                $this->where($this->primaryKey, $id)->update($this->attributes, $id);
             } else {
-                $id = $this->insertGetId($entity);
-                $entity->{$this->primaryKey} = $id;
+                $id = $this->insertGetId($this->attributes);
+                $this->attributes[$this->primaryKey] = $id;
             }
-            return $entity;
+            return $this->attributes;
         } catch (\Exception $exception) {
-            throw new ConexionDBException($exception->getMessage(), 500);
+            throw ConexionDBException::showMessage($exception->getMessage());
         }
     }
 
-    public function delete(BaseEntity $entity) {
+    public function delete() {
         try {
-            return $this->deleteRow($entity);
+            return $this->deleteRow();
         } catch (\Exception $exception) {
-            throw new ConexionDBException($exception->getMessage(), 500);
+            throw ConexionDBException::showMessage($exception->getMessage());
         }
     }
 
@@ -132,19 +171,19 @@ abstract class BaseRepositoryMysql implements BaseRepository {
         $this->params = $params;
 
         if ($this->params == null) {
-            $stmt = $this->driver->query($query);
+            $stmt = self::$driver->query($query);
         } else {
-            $stmt = $this->driver->statement($query, $this->params);
+            $stmt = self::$driver->statement($query, $this->params);
         }
 
         if ($return) {
             $table = ucfirst($this->getTable());
 
             if ($isList == true) {
-                $stmt->setFetchMode($this->driver->getConnection()::FETCH_CLASS, sprintf($this->nameSpaceEntity, $table, $table));
+                $stmt->setFetchMode(self::$driver->getConnection()::FETCH_CLASS, sprintf($this->nameSpaceModel, $table));
                 $result = $stmt->fetchAll();
             } else {
-                $result = $stmt->fetchObject(sprintf($this->nameSpaceEntity, $table, $table));
+                $result = $stmt->fetchObject(sprintf($this->nameSpaceModel, $table));
             }
         } else {
             $result = $stmt->rowCount();

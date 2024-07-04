@@ -13,7 +13,7 @@ trait InsertClause {
         if (!$get_last_insert_id) {
             return $result;
         } else {
-            return $this->driver->lastInsertId();
+            return self::$driver->lastInsertId();
         }
     }
 

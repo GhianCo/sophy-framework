@@ -1,6 +1,6 @@
 <?php
 
-namespace Sophy\Domain\Exceptions;
+namespace Sophy\Exceptions;
 
 class AuthException extends SophyException {
 }

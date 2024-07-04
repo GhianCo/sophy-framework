@@ -2,6 +2,8 @@
 
 namespace Sophy\Database\Drivers\Mysql;
 
+use Sophy\Domain\Consts;
+
 trait PaginateClause {
     use ProcessClause;
 
@@ -54,12 +56,12 @@ trait PaginateClause {
         return $this->take($take)->offset($offset)->get();
     }
 
-    public function paginate(int $value, int $take = 15) {
+    public function paginate(int $value, int $take = Consts::LIMIT_ROWS_COUNT) {
         $this->callFoundRows();
         $data = $this->page($value - 1, $take);
 
-        $result = $this->driver->query("SELECT FOUND_ROWS() AS foundRows");
-        $result->setFetchMode($this->driver->getConnection()::FETCH_ASSOC);
+        $result = self::$driver->query("SELECT FOUND_ROWS() AS foundRows");
+        $result->setFetchMode(self::$driver->getConnection()::FETCH_ASSOC);
         $total = $result->fetch()["foundRows"];
 
         $startIndex = (($value - 1) * $take) + 1;
